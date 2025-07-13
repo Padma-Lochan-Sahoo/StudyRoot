@@ -2,11 +2,15 @@
 import User from "../models/User.js";
 
 export const handleClerkWebhook = async (req, res) => {
+  console.log("📦 Incoming Clerk Webhook Body:", JSON.stringify(req.body, null, 2));
   const { data, type } = req.body;
 
   if (type === "user.created") {
     const { id, email_addresses, first_name, last_name, public_metadata } = data;
-
+     if (!id) {
+      console.error("Webhook user.created missing id");
+      return res.status(400).send("Missing user id");
+    }
     try {
       await User.create({
         clerkId: id,
