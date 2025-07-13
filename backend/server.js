@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import webhookRoutes from "./routes/webhook.js";
+import webhookRoutes from "./routes/webhook.js"
 
 dotenv.config();
 const app = express();
