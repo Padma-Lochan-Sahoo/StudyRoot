@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGO_URI).then(() =>
 app.use(
   express.json({
     verify: (req, res, buf) => {
-      req.rawBody = buf.toString();
+      req.rawBody = buf;
     },
   })
 );
