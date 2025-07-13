@@ -65,6 +65,29 @@ export const handleClerkWebhook = async (req, res) => {
     }
   }
 
+  if (type === "user.deleted") {
+  const { id } = data;
+
+  if (!id) {
+    console.error("Webhook user.deleted missing id");
+    return res.status(400).send("Missing user id");
+  }
+
+  try {
+    const deletedUser = await User.findOneAndDelete({ clerkId: id });
+    if (deletedUser) {
+      console.log(`✅ User deleted: ${id}`);
+    } else {
+      console.log(`⚠️ User not found for deletion: ${id}`);
+    }
+    return res.status(200).send("User deleted");
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    return res.status(500).send("Error deleting user");
+  }
+}
+
+
   console.log("ℹ️ Event ignored:", type);
   res.status(200).send("Event ignored");
 };
