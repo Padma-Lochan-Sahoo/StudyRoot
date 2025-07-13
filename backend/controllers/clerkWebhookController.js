@@ -13,29 +13,35 @@ export const handleClerkWebhook = async (req, res) => {
   console.log(`📣 Handling Clerk event: ${type}`);
 
   if (type === "user.created") {
-    const { id, email_addresses, first_name, last_name, public_metadata } = data;
+  const { id, email_addresses, first_name, last_name, public_metadata } = data;
 
-    if (!id) {
-      console.error("❌ user.created event missing user id");
-      return res.status(400).send("Missing user id");
-    }
-
-    try {
-      await User.create({
-        clerkId: id,
-        email: email_addresses?.[0]?.email_address || "",
-        firstName: first_name || "",
-        lastName: last_name || "",
-        publicMetadata: public_metadata || {},
-      });
-
-      console.log(`✅ User created: ${id}`);
-      return res.status(200).send("User stored");
-    } catch (err) {
-      console.error("❌ Error storing user:", err);
-      return res.status(500).send("Error storing user");
-    }
+  if (!id) {
+    console.error("❌ user.created event missing user id");
+    return res.status(400).send("Missing user id");
   }
+
+  try {
+    await User.findOneAndUpdate(
+      { clerkId: id }, // query
+      {
+        $set: {
+          email: email_addresses?.[0]?.email_address || "",
+          firstName: first_name || "",
+          lastName: last_name || "",
+          publicMetadata: public_metadata || {},
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log(`✅ User created or updated: ${id}`);
+    return res.status(200).send("User stored");
+  } catch (err) {
+    console.error("❌ Error storing user:", err);
+    return res.status(500).send("Error storing user");
+  }
+}
+
 
   if (type === "user.updated") {
     const { id, email_addresses, first_name, last_name, public_metadata } = data;
