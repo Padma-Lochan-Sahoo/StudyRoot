@@ -3,6 +3,9 @@ import { Webhook } from "svix";
 
 export const verifyClerkWebhook = (req, res, next) => {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+console.log("Headers:", JSON.stringify(req.headers, null, 2));
+console.log("Raw body:", req.rawBody.toString());
+console.log("Webhook Secret:", webhookSecret);
 
   if (!webhookSecret) {
     console.error("❌ Missing CLERK_WEBHOOK_SECRET");
