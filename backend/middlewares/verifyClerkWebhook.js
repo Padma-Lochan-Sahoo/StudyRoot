@@ -1,16 +1,18 @@
-import crypto from "crypto";
+// verifyClerkWebhook.js
+import { Webhook } from "svix";
 
-export const verifyClerkWebhook = (req, res, next) => {
-  const signature = req.headers["clerk-signature"];
-  const rawBody = JSON.stringify(req.body);
-  const expectedSignature = crypto
-    .createHmac("sha256", process.env.CLERK_WEBHOOK_SECRET)
-    .update(rawBody)
-    .digest("hex");
+export const verifyClerkWebhook = async (req, res, next) => {
+  const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-  if (signature !== expectedSignature) {
-    return res.status(403).send("Invalid webhook signature");
+  let evt;
+
+  try {
+    evt = wh.verify(req.rawBody, req.headers);
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send("Invalid webhook signature");
   }
 
+  req.body = evt;
   next();
 };

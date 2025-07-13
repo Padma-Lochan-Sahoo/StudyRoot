@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   firstName: String,
   lastName: String,
+  publicMetadata: { type: mongoose.Schema.Types.Mixed },
 });
 
 export default mongoose.model("User", userSchema);
