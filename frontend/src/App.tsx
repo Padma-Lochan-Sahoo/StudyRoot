@@ -21,11 +21,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          {/* <Route path="/signup/verify-email-address" element={<VerifyEmail />} /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/:course" element={<CourseView />} />
           <Route path="/dashboard/:course/:semester" element={<SemesterView />} />
@@ -33,7 +33,6 @@ const App = () => (
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
