@@ -57,7 +57,7 @@ export const sendOtpEmail = async (email, otp) => {
       <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;" />
 
       <p style="font-size: 12px; text-align: center; color: #aaa;">
-        &copy; ${new Date().getFullYear()} ConvoFlow. All rights reserved.
+        &copy; ${new Date().getFullYear()} StudyRoot. All rights reserved.
       </p>
     </div>
   `

@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup, login, logout, verifyotp, checkAuth } from '../controllers/auth.contoller.js';
+import { signup, login, logout, verifyotp, checkAuth } from '../controllers/auth.controller.js';
 import { protectRoute } from '../middleware/auth.moddleware.js';
 
 
