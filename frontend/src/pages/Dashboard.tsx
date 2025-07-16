@@ -7,8 +7,6 @@ import { GraduationCap, LogOut, User, BookOpen, Code, Building, Briefcase, MoreH
 import UserDropdown from "@/components/UserDropdown";
 import StatsCard from "@/components/StatsCard";
 
-import { SignedIn, SignedOut, RedirectToSignIn, UserButton } from "@clerk/clerk-react";
-
 const courses = [
   {
     id: "btech",
@@ -69,9 +67,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <>
-      <SignedIn>
-        <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,7 +80,7 @@ const Dashboard = () => {
                 UniNote
               </span>
             </Link>
-            <UserButton afterSignOutUrl="/" />
+            
             <UserDropdown userName={userName} />
           </div>
         </div>
@@ -146,14 +142,6 @@ const Dashboard = () => {
         <StatsCard />
       </div>
     </div>
-
-      </SignedIn>
-          <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-
-    </>
-    
   );
 };
 

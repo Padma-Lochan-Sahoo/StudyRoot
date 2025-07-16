@@ -35,7 +35,7 @@ const StatsCard = () => {
           >
             <CardContent className="p-6 text-center">
               <div className={`w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
-                <IconComponent className="h-6 w-6 text-white" />
+                <IconComponent className="h-6 w-6 text-white" />     
               </div>
               <div className="text-3xl font-bold text-gray-800 mb-1">{stat.value}</div>
               <div className="text-gray-600 font-medium">{stat.label}</div>
