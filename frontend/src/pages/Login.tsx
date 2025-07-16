@@ -1,3 +1,4 @@
+import axios from "@/lib/axiosInstance"; // use the axiosInstance here
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,8 @@ import { GraduationCap, Mail, Lock, User } from "lucide-react";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,12 +18,45 @@ const Login = () => {
   });
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate login/signup
-    localStorage.setItem("isAuthenticated", "true");
-    navigate("/dashboard");
-  };
+  
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    if (isLogin) {
+      const { data } = await axios.post("/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log("Login Success ✅", data);
+      navigate("/dashboard");
+    } else {
+      const { data } = await axios.post("/auth/signup", {
+        fullName: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log("Signup OTP sent 📧", data);
+      navigate("/verify-otp", {
+        state: {
+          email: formData.email,
+          name: formData.name,
+          password: formData.password,
+        },
+      });
+    }
+  } catch (err: any) {
+    console.error("Auth Error ❌", err.response?.data?.message || err.message);
+    alert(err.response?.data?.message || "Something went wrong");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -139,12 +175,18 @@ const Login = () => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300 hover:scale-[1.02]"
-              >
-                {isLogin ? "Sign In" : "Create Account"}
-              </Button>
+         <Button
+  type="submit"
+  disabled={isLoading}
+  className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
+    isLoading
+      ? "opacity-70 cursor-not-allowed"
+      : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
+  }`}
+>
+  {isLoading ? (isLogin ? "Signing In..." : "Creating Account...") : (isLogin ? "Sign In" : "Create Account")}
+</Button>
+
             </form>
 
             <div className="text-center">

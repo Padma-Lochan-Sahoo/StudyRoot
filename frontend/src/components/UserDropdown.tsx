@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import axios from "@/lib/axiosInstance";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +21,16 @@ interface UserDropdownProps {
 const UserDropdown = ({ userName, userImage }: UserDropdownProps) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    navigate("/");
-  };
+const handleLogout = async () => {
+  try {
+    await axios.post("/auth/logout"); // backend should clear the cookie
+    navigate("/login"); // send user back to login
+  } catch (err: any) {
+    console.error("Logout Error ❌", err.response?.data?.message || err.message);
+    alert("Something went wrong while logging out.");
+  }
+};
+
 
   return (
     <DropdownMenu>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GraduationCap, LogOut, User, BookOpen, Code, Building, Briefcase, MoreHorizontal } from "lucide-react";
 import UserDropdown from "@/components/UserDropdown";
 import StatsCard from "@/components/StatsCard";
+import axios from "axios";
 
 const courses = [
   {
@@ -57,17 +58,26 @@ const courses = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userName] = useState("Student");
+  const [userName, setUserName] = useState("");
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
+useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/auth/check", {
+        withCredentials: true,
+      });
+      setUserName(data.fullName); // Set user's actual name
+    } catch (err) {
       navigate("/login");
     }
-  }, [navigate]);
+  };
+  checkAuth();
+}, []);
+
+
 
   return (
-        <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,9 +87,10 @@ const Dashboard = () => {
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                UniNote
+                StudyRoot
               </span>
             </Link>
+            
             <UserDropdown userName={userName} />
           </div>
         </div>
@@ -141,7 +152,6 @@ const Dashboard = () => {
         <StatsCard />
       </div>
     </div>
-    
   );
 };
 
