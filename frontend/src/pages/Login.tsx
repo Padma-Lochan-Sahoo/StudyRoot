@@ -1,3 +1,4 @@
+import axios from "@/lib/axiosInstance"; // use the axiosInstance here
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,12 +16,44 @@ const Login = () => {
   });
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate login/signup
-    localStorage.setItem("isAuthenticated", "true");
-    navigate("/dashboard");
-  };
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    if (isLogin) {
+      // 🔐 Login flow
+      const { data } = await axios.post("/auth/login", {
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log("Login Success ✅", data);
+      navigate("/dashboard");
+    } else {
+      // 📩 Signup flow - send OTP
+      const { data } = await axios.post("/auth/signup", {
+        fullName: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+
+      console.log("Signup OTP sent 📧", data);
+      // Redirect to OTP verification page
+      navigate("/verify-otp", {
+        state: {
+          email: formData.email,
+          name: formData.name,
+          password: formData.password
+        }
+      });
+    }
+  } catch (err: any) {
+    console.error("Auth Error ❌", err.response?.data?.message || err.message);
+    alert(err.response?.data?.message || "Something went wrong");
+  }
+};
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
