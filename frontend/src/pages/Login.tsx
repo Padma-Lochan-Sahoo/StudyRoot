@@ -9,6 +9,8 @@ import { GraduationCap, Mail, Lock, User } from "lucide-react";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,40 +21,41 @@ const Login = () => {
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+  setIsLoading(true);
 
   try {
     if (isLogin) {
-      // 🔐 Login flow
       const { data } = await axios.post("/auth/login", {
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
       console.log("Login Success ✅", data);
       navigate("/dashboard");
     } else {
-      // 📩 Signup flow - send OTP
       const { data } = await axios.post("/auth/signup", {
         fullName: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
       console.log("Signup OTP sent 📧", data);
-      // Redirect to OTP verification page
       navigate("/verify-otp", {
         state: {
           email: formData.email,
           name: formData.name,
-          password: formData.password
-        }
+          password: formData.password,
+        },
       });
     }
   } catch (err: any) {
     console.error("Auth Error ❌", err.response?.data?.message || err.message);
     alert(err.response?.data?.message || "Something went wrong");
+  } finally {
+    setIsLoading(false);
   }
 };
+
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,12 +175,18 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300 hover:scale-[1.02]"
-              >
-                {isLogin ? "Sign In" : "Create Account"}
-              </Button>
+         <Button
+  type="submit"
+  disabled={isLoading}
+  className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
+    isLoading
+      ? "opacity-70 cursor-not-allowed"
+      : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
+  }`}
+>
+  {isLoading ? (isLogin ? "Signing In..." : "Creating Account...") : (isLogin ? "Sign In" : "Create Account")}
+</Button>
+
             </form>
 
             <div className="text-center">
