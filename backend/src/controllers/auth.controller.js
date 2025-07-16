@@ -33,13 +33,15 @@ export const signup = async (req, res) => {
 
 
     const otp = generateOTP();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOTP = await bcrypt.hash(otp, salt);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
 
     const otpDoc = new Otp({
       email,
-      otp,
+      otp: hashedOTP,
       fullName,
       password: hashedPassword,
     });
@@ -67,13 +69,17 @@ export const verifyotp = async (req, res) => {
     }
 
 
-    const otpDoc = await Otp.findOne({ email, otp });
+    const otpDoc = await Otp.findOne({ email });
 
 
     if (!otpDoc) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
+    const isOtpValid = await bcrypt.compare(otp, otpDoc.otp);
+    if (!isOtpValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
     const now = new Date();
     const diff = (now - otpDoc.createdAt) / 1000;
