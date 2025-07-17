@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -12,6 +12,7 @@ import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 import { Toaster } from "@/components/ui/toaster";
+import { Loader } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,9 +28,12 @@ const App = () => {
   // Check auth when app mounts
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
-  // If user is already logged in, redirect to dashboard
+
+  console.log({ authUser });
+
+
   useEffect(() => {
     if (!isCheckingAuth && authUser) {
       navigate("/dashboard");
@@ -37,12 +41,12 @@ const App = () => {
   }, [isCheckingAuth, authUser, navigate]);
 
   // While checking auth, show loading screen
-  if (isCheckingAuth) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <span className="text-lg">Loading...</span>
-      </div>
-    );
+  if(isCheckingAuth && !authUser){
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <Loader className="size-10 animate-spin"/>
+    </div>
+  )
   }
 
   return (
@@ -53,10 +57,10 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/:course" element={<CourseView />} />
-          <Route path="/dashboard/:course/:semester" element={<SemesterView />} />
-          <Route path="/dashboard/:course/:semester/:subject" element={<SubjectView />} />
+          <Route path="/dashboard" element={authUser ? <Dashboard />: <Navigate to="/" />} />
+          <Route path="/dashboard/:course" element={authUser ? <CourseView /> : <Navigate to="/" />} />
+          <Route path="/dashboard/:course/:semester" element={authUser ? <SemesterView /> : <Navigate to="/" />} />
+          <Route path="/dashboard/:course/:semester/:subject" element={authUser ? <SubjectView /> : <Navigate to="/" />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

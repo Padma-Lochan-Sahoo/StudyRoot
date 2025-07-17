@@ -34,6 +34,8 @@ const Login = () => {
     if (otpStep) {
       const success = await verifyOtp(signupEmail!, otp);
       if (success) {
+        setOtp("");
+        setFormData({ fullName: "", email: "", password: "" });
         navigate("/dashboard");
       }
       return;
@@ -45,6 +47,7 @@ const Login = () => {
         password: formData.password,
       });
       if (success) {
+        setFormData({ fullName: "", email: "", password: "" });
         navigate("/dashboard");
       }
     } else {
