@@ -13,7 +13,7 @@ const CourseView = () => {
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAuthenticated");
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/auth");
     }
   }, [navigate]);
 

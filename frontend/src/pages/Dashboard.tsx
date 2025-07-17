@@ -68,7 +68,7 @@ useEffect(() => {
       });
       setUserName(data.fullName); // Set user's actual name
     } catch (err) {
-      navigate("/login");
+      console.log("Authentication check failed:", err);
     }
   };
   checkAuth();

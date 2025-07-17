@@ -8,11 +8,10 @@ interface AuthUser {
   name: string;
   email: string;
   profilePic?: string;
-  // Add more fields as needed
 }
 
 interface SignupData {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
 }
@@ -38,10 +37,6 @@ interface AuthStore {
   logout: () => Promise<boolean>;
 }
 
-const BASE_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://studyroot-backend.onrender.com";
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   authUser: null,

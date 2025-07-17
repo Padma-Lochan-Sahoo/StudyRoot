@@ -65,7 +65,7 @@ const Navigation = () => {
             >
               About
             </a>
-            <Link to="/login">
+            <Link to="/auth">
               <Button
                 variant="outline"
                 className="border-2 border-uninote-blue text-uninote-blue hover:bg-uninote-blue hover:text-white rounded-xl"
@@ -73,7 +73,7 @@ const Navigation = () => {
                 Login
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/auth">
               <Button className="bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-semibold rounded-xl">
                 Sign Up
               </Button>
@@ -110,7 +110,7 @@ const Navigation = () => {
                 About
               </a>
               <div className="flex flex-col space-y-2 px-4">
-                <Link to="/login">
+                <Link to="/auth">
                   <Button
                     variant="outline"
                     className="w-full border-2 border-uninote-blue text-uninote-blue hover:bg-uninote-blue hover:text-white rounded-xl"
@@ -118,7 +118,7 @@ const Navigation = () => {
                     Login
                   </Button>
                 </Link>
-                <Link to="/login">
+                <Link to="/auth">
                   <Button className="w-full bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-semibold rounded-xl">
                     Sign Up
                   </Button>
