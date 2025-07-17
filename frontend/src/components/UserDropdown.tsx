@@ -21,20 +21,23 @@ interface UserDropdownProps {
 
 const UserDropdown = ({ userName, userImage }: UserDropdownProps) => {
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { logout, authUser } = useAuthStore(); // Get authUser from store
 
-const handleLogout = async () => {
-  try {
-    await logout();
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("authUser");
-    navigate("/"); // send user back to login
-  } catch (err: any) {
-    console.error("Logout Error ❌", err.response?.data?.message || err.message);
-    alert("Something went wrong while logging out.");
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await logout();
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authUser");
+      navigate("/"); // send user back to login
+    } catch (err: any) {
+      console.error("Logout Error ❌", err.response?.data?.message || err.message);
+      alert("Something went wrong while logging out.");
+    }
+  };
 
+  const handleAdminRedirect = () => {
+    navigate("/admin");
+  };
 
   return (
     <DropdownMenu>
@@ -49,15 +52,29 @@ const handleLogout = async () => {
           <span className="text-gray-700 font-medium hidden sm:block">{userName}</span>
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-lg border-white/20">
         <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100/50">
           <User className="h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
+
         <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100/50">
           <Settings className="h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>
+
+        {/* Conditionally show Admin option */}
+        {authUser?.role === "admin" && (
+          <DropdownMenuItem
+            onClick={handleAdminRedirect}
+            className="flex items-center space-x-2 hover:bg-indigo-100 text-indigo-600"
+          >
+            <User className="h-4 w-4" />
+            <span>Admin Panel</span>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem 
           onClick={handleLogout}
           className="flex items-center space-x-2 text-red-600 hover:bg-red-50/50"
@@ -69,5 +86,6 @@ const handleLogout = async () => {
     </DropdownMenu>
   );
 };
+
 
 export default UserDropdown;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,13 @@ const Login = () => {
     signupEmail,
     authUser,
   } = useAuthStore();
+
+  useEffect(() => {
+  if (authUser) {
+    navigate("/dashboard");
+  }
+}, [authUser, navigate]);
+
 
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });

@@ -11,6 +11,7 @@ import SubjectView from "./pages/SubjectView";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
+import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,20 +26,19 @@ const App = () => {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
   const navigate = useNavigate();
 
+  const DASHBOARD_ROLES = ["admin", "user"];
+const ADMIN_ONLY = ["admin"];
+
+
   // Check auth when app mounts
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
 
   console.log({ authUser });
 
 
-  useEffect(() => {
-    if (!isCheckingAuth && authUser) {
-      navigate("/dashboard");
-    }
-  }, [isCheckingAuth, authUser, navigate]);
 
   // While checking auth, show loading screen
   if(isCheckingAuth && !authUser){
@@ -54,16 +54,87 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Login />} />
-          <Route path="/dashboard" element={authUser ? <Dashboard />: <Navigate to="/" />} />
-          <Route path="/dashboard/:course" element={authUser ? <CourseView /> : <Navigate to="/" />} />
-          <Route path="/dashboard/:course/:semester" element={authUser ? <SemesterView /> : <Navigate to="/" />} />
-          <Route path="/dashboard/:course/:semester/:subject" element={authUser ? <SubjectView /> : <Navigate to="/" />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+<Routes>
+  <Route
+  path="/"
+  element={
+    authUser ? (
+      authUser.role === "admin" ? (
+        <Navigate to="/admin" />
+      ) : (
+        <Navigate to="/dashboard" />
+      )
+    ) : (
+      <Index />
+    )
+  }
+/>
+
+<Route
+  path="/auth"
+  element={
+    authUser ? (
+      authUser.role === "admin" ? (
+        <Navigate to="/admin" />
+      ) : (
+        <Navigate to="/dashboard" />
+      )
+    ) : (
+      <Login />
+    )
+  }
+/>
+
+
+
+
+  {/* Only for non-admin users */}
+  <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <Dashboard />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/dashboard/:course"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <CourseView />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/dashboard/:course/:semester"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <SemesterView />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/dashboard/:course/:semester/:subject"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <SubjectView />
+      </ProtectedRoute>
+    }
+  />
+
+  {/* Only for admins */}
+  <Route
+    path="/admin"
+    element={
+      <ProtectedRoute allowedRoles={ADMIN_ONLY}>
+        <AdminPanel />
+      </ProtectedRoute>
+    }
+  />
+
+  <Route path="*" element={<NotFound />} />
+</Routes>
+
       </TooltipProvider>
     </QueryClientProvider>
   );

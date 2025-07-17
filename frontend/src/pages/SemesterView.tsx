@@ -5,17 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, ChevronRight, Home, BookOpen } from "lucide-react";
 import UserDropdown from "@/components/UserDropdown";
+import Navbar from "@/components/Navbar"; 
+import { useAuthStore } from "@/store/useAuthStore";
 
 const SemesterView = () => {
   const { course, semester } = useParams();
   const navigate = useNavigate();
+  const { authUser } = useAuthStore();
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [navigate]);
 
   const getCourseName = (courseId: string) => {
     const courseNames: Record<string, string> = {
@@ -72,22 +69,7 @@ const SemesterView = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-xl">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                UniNote
-              </span>
-            </Link>
-            
-            <UserDropdown userName="Student" />
-          </div>
-        </div>
-      </nav>
+      <Navbar userName={authUser?.fullName || "Guest"} />
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

@@ -5,8 +5,9 @@ import toast from "react-hot-toast";
 // Define user type based on your API response structure
 interface AuthUser {
   _id: string;
-  name: string;
+  fullName: string;
   email: string;
+  role: string;
   profilePic?: string;
 }
 
@@ -49,7 +50,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   checkAuth: async () => {
     try {
       const res = await axios.get<AuthUser>("/auth/check");
+
       set({ authUser: res.data });
+      console.log("Auth user inside checkAuth:", res.data.role);
     } catch (error) {
       console.log("Error in checkAuth: ", error);
       set({ authUser: null });

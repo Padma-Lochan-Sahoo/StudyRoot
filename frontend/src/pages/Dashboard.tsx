@@ -4,9 +4,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, LogOut, User, BookOpen, Code, Building, Briefcase, MoreHorizontal } from "lucide-react";
-import UserDropdown from "@/components/UserDropdown";
 import StatsCard from "@/components/StatsCard";
-import axios from "axios";
+import Navbar from "@/components/Navbar"; 
+import { useAuthStore } from "@/store/useAuthStore";
 
 const courses = [
   {
@@ -58,43 +58,12 @@ const courses = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
-
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const { data } = await axios.get("http://localhost:5000/api/auth/check", {
-        withCredentials: true,
-      });
-      setUserName(data.fullName); // Set user's actual name
-    } catch (err) {
-      console.log("Authentication check failed:", err);
-    }
-  };
-  checkAuth();
-}, []);
-
-
+  const { authUser } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-xl">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                StudyRoot
-              </span>
-            </Link>
-            
-            <UserDropdown userName={userName} />
-          </div>
-        </div>
-      </nav>
+      <Navbar userName={authUser?.fullName || "Guest"} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

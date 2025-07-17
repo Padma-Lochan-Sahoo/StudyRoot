@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GraduationCap, Upload, FileText, Edit, Trash2, Plus, LogOut, Users, BookOpen, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const AdminPanel = () => {
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("upload");
@@ -21,17 +24,18 @@ const AdminPanel = () => {
     file: null as File | null
   });
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+  try {
+    await logout();
     localStorage.removeItem("isAuthenticated");
-    navigate("/");
-  };
+    localStorage.removeItem("authUser");
+    navigate("/"); // send user back to login
+  } catch (err: any) {
+    console.error("Logout Error ❌", err.response?.data?.message || err.message);
+    alert("Something went wrong while logging out.");
+  }
+};
 
   const uploadedNotes = [
     {
