@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "@/lib/axiosInstance";
+import { useAuthStore } from "@/store/useAuthStore";
 
 import {
   DropdownMenu,
@@ -20,11 +21,14 @@ interface UserDropdownProps {
 
 const UserDropdown = ({ userName, userImage }: UserDropdownProps) => {
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
 
 const handleLogout = async () => {
   try {
-    await axios.post("/auth/logout"); // backend should clear the cookie
-    navigate("/login"); // send user back to login
+    await logout();
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("authUser");
+    navigate("/"); // send user back to login
   } catch (err: any) {
     console.error("Logout Error ❌", err.response?.data?.message || err.message);
     alert("Something went wrong while logging out.");

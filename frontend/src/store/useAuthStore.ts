@@ -11,7 +11,7 @@ interface AuthUser {
 }
 
 interface SignupData {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
 }
