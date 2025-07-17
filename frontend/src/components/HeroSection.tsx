@@ -66,7 +66,7 @@ const HeroSection = () => {
               UniNote makes accessing semester-wise, subject-wise notes easier than ever. From B.Tech to MBA – get what you need, when you need it.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-              <Link to="/login">
+              <Link to="/auth">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-uninote-blue to-uninote-purple text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"

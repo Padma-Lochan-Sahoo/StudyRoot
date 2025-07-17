@@ -1,75 +1,66 @@
-import axios from "@/lib/axiosInstance"; // use the axiosInstance here
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Mail, Lock, User } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Key } from "lucide-react";
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: ""
-  });
   const navigate = useNavigate();
+  const {
+    signup,
+    verifyOtp,
+    login,
+    isSigningUp,
+    isLoggingIn,
+    isVerifyingOtp,
+    otpStep,
+    signupEmail,
+    authUser,
+  } = useAuthStore();
 
-  
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-
-  try {
-    if (isLogin) {
-      const { data } = await axios.post("/auth/login", {
-        email: formData.email,
-        password: formData.password,
-      });
-
-      console.log("Login Success ✅", data);
-      navigate("/dashboard");
-    } else {
-      const { data } = await axios.post("/auth/signup", {
-        fullName: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      console.log("Signup OTP sent 📧", data);
-      navigate("/verify-otp", {
-        state: {
-          email: formData.email,
-          name: formData.name,
-          password: formData.password,
-        },
-      });
-    }
-  } catch (err: any) {
-    console.error("Auth Error ❌", err.response?.data?.message || err.message);
-    alert(err.response?.data?.message || "Something went wrong");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
+  const [otp, setOtp] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpStep) {
+      const success = await verifyOtp(signupEmail!, otp);
+      if (success) {
+        navigate("/dashboard");
+      }
+      return;
+    }
+
+    if (isLogin) {
+      const success = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (success) {
+        navigate("/dashboard");
+      }
+    } else {
+      await signup({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+      });
+    }
   };
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side - Motivational Section */}
+      {/* Left - Motivation */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-uninote-blue via-uninote-purple to-uninote-blue relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
           <div className="flex items-center space-x-3 mb-8">
             <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl">
@@ -78,19 +69,15 @@ const handleSubmit = async (e: React.FormEvent) => {
             <span className="text-3xl font-bold">UniNote</span>
           </div>
           <h1 className="text-4xl font-bold text-center mb-6">
-            Study Smarter, <br />Not Harder
+            Study Smarter, <br /> Not Harder
           </h1>
           <p className="text-xl text-center text-white/80 max-w-md">
-            Access thousands of verified study materials from top universities. 
-            Your academic success starts here.
+            Access thousands of verified study materials from top universities. Your academic success starts here.
           </p>
         </div>
-        {/* Abstract shapes */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
       </div>
 
-      {/* Right Side - Auth Form */}
+      {/* Right - Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-uninote-light to-white">
         <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
           <CardHeader className="text-center">
@@ -103,103 +90,131 @@ const handleSubmit = async (e: React.FormEvent) => {
               </span>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {isLogin ? "Welcome Back" : "Join UniNote"}
+              {otpStep ? "Verify OTP" : isLogin ? "Welcome Back" : "Join UniNote"}
             </CardTitle>
             <CardDescription className="text-gray-600">
-              {isLogin 
-                ? "Sign in to access your study materials" 
-                : "Create your account to get started"
-              }
+              {otpStep
+                ? "Enter the OTP sent to your email"
+                : isLogin
+                ? "Sign in to access your study materials"
+                : "Create your account to get started"}
             </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
+              {!otpStep && !isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
-                      id="name"
-                      name="name"
+                      id="fullName"
+                      name="fullName"
                       type="text"
                       placeholder="Enter your full name"
-                      className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
-                      value={formData.name}
+                      value={formData.fullName}
                       onChange={handleInputChange}
                       required
+                      className="pl-10 h-12 bg-white/50 border-gray-200"
                     />
                   </div>
                 </div>
               )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    className="pl-10 h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
 
-              {isLogin && (
-                <div className="text-right">
-                  <Link to="#" className="text-sm text-uninote-blue hover:underline">
-                    Forgot Password?
-                  </Link>
+              {!otpStep && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {otpStep && (
+                <div className="space-y-2">
+                  <Label htmlFor="otp">OTP</Label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      placeholder="Enter OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                      className="pl-10 h-12 bg-white/50 border-gray-200"
+                    />
+                  </div>
                 </div>
               )}
 
-         <Button
-  type="submit"
-  disabled={isLoading}
-  className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
-    isLoading
-      ? "opacity-70 cursor-not-allowed"
-      : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
-  }`}
->
-  {isLoading ? (isLogin ? "Signing In..." : "Creating Account...") : (isLogin ? "Sign In" : "Create Account")}
-</Button>
-
+              <Button
+                type="submit"
+                disabled={isSigningUp || isLoggingIn || isVerifyingOtp}
+                className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
+                  isSigningUp || isLoggingIn || isVerifyingOtp
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
+                }`}
+              >
+                {otpStep
+                  ? isVerifyingOtp
+                    ? "Verifying OTP..."
+                    : "Verify OTP"
+                  : isLogin
+                  ? isLoggingIn
+                    ? "Signing In..."
+                    : "Sign In"
+                  : isSigningUp
+                  ? "Creating Account..."
+                  : "Create Account"}
+              </Button>
             </form>
 
-            <div className="text-center">
-              <p className="text-gray-600">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-                <button
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-uninote-blue hover:underline font-medium"
-                >
-                  {isLogin ? "Sign Up" : "Sign In"}
-                </button>
-              </p>
-            </div>
+            {!otpStep && (
+              <div className="text-center">
+                <p className="text-gray-600">
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+                  <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-uninote-blue hover:underline font-medium"
+                  >
+                    {isLogin ? "Sign Up" : "Sign In"}
+                  </button>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
