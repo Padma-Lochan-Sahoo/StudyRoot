@@ -121,6 +121,8 @@ export const verifyotp = async (req, res) => {
       id: newUser._id,
       fullName: newUser.fullName,
       email: newUser.email,
+      profilePic: newUser.profilePic,
+      role: newUser.role,
       token,
     });
   } catch (err) {
