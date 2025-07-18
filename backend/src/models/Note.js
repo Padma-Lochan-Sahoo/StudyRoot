@@ -12,6 +12,13 @@ const noteSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  fileSize: {
+    type: String,
+  },
+  uploadDate: { 
+    type: Date, 
+    default: Date.now 
+  },
   subject: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Subject',
@@ -22,7 +29,15 @@ const noteSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  downloads: { 
+    type: Number, 
+    default: 0 
+  },
 });
+
+// ✅ Prevent duplicate note titles under the same subject
+noteSchema.index({ title: 1, subject: 1 }, { unique: true });
+noteSchema.index({ fileUrl: 1, subject: 1 }, { unique: true });
 
 const Note = mongoose.model('Note', noteSchema);
 export default Note;

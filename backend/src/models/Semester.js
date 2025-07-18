@@ -12,5 +12,8 @@ const semesterSchema = new mongoose.Schema({
   },
 });
 
+// ✅ Ensure uniqueness: one semester number per course
+semesterSchema.index({ number: 1, course: 1 }, { unique: true });
+
 const Semester = mongoose.model('Semester', semesterSchema);
 export default Semester;
