@@ -4,6 +4,7 @@ import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import Note from "../models/Note.js";
 import streamifier from "streamifier";
+import axios from "axios";
 
 const streamUpload = (buffer) => {
   return new Promise((resolve, reject) => {
@@ -69,5 +70,29 @@ export const uploadNote = async (req, res) => {
   } catch (error) {
     console.error("Upload Note Error:", error);
     res.status(500).json({ success: false, message: 'Something went wrong during note upload' });
+  }
+};
+
+//Download Note
+export const downloadNote = async (req, res) => {
+  try {
+    const noteId = req.params.id;
+    const note = await Note.findById(noteId);
+    if (!note) {
+      return res.status(404).json({ success: false, message: "Note not found" });
+    }
+
+    // Increment download count
+    note.downloads = (note.downloads || 0) + 1;
+    await note.save();
+
+    // Fetch file from Cloudinary (or remote URL)
+    const fileResponse = await axios.get(note.fileUrl, { responseType: "stream" });
+    res.setHeader("Content-Disposition", `attachment; filename=\"${note.title}\"`);
+    res.setHeader("Content-Type", fileResponse.headers["content-type"] || "application/octet-stream");
+    fileResponse.data.pipe(res);
+  } catch (error) {
+    console.error("Download Note Error:", error);
+    res.status(500).json({ success: false, message: "Something went wrong during note download" });
   }
 };
