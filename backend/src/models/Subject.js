@@ -8,7 +8,7 @@ const subjectSchema = new mongoose.Schema({
   subjectCode: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
   },
   semester: {
     type: mongoose.Schema.Types.ObjectId,
