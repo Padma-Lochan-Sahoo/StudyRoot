@@ -4,6 +4,7 @@ import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import Note from "../models/Note.js";
 import { streamUpload } from "../lib/cloudinary.js";
+import path from 'path';
 
 export const uploadNote = async (req, res) => {
   try {
@@ -41,6 +42,20 @@ export const uploadNote = async (req, res) => {
     // Step 5: Upload to Cloudinary
     const result = await streamUpload(req.file.buffer);
     
+    // Step 6: Extract file extension
+    const originalName = req.file.originalname || '';
+    const ext = path.extname(originalName).toLowerCase().replace('.', ''); // e.g., 'pdf'
+    
+    // Normalize extensions
+    let fileFormat = ext;
+    if (['doc', 'docx'].includes(ext)) fileFormat = 'docx';
+    else if (['ppt', 'pptx'].includes(ext)) fileFormat = 'pptx';
+    else if (['xls', 'xlsx'].includes(ext)) fileFormat = 'xlsx';
+
+    if (!['pdf', 'docx', 'txt', 'pptx', 'xlsx'].includes(fileFormat)) {
+      return res.status(400).json({ success: false, message: 'Unsupported file format' });
+    }
+
     // Step 6: Create and save Note
     const note = new Note({
       title,
@@ -48,7 +63,7 @@ export const uploadNote = async (req, res) => {
       fileSize: `${(req.file.size / 1024 / 1024).toFixed(2)} MB`,
       subject: foundSubject._id,
       uploadedBy: req.user._id,
-      description: req.body.description || '',
+      fileFormat,
     });
 
     await note.save();

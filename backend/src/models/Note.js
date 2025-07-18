@@ -5,8 +5,10 @@ const noteSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  description: {
+  fileFormat: {
     type: String,
+    required: true,
+    enum: ['pdf', 'docx', 'txt', 'pptx', 'xlsx'],
   },
   fileUrl: {
     type: String,
