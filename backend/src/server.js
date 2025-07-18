@@ -2,6 +2,8 @@
 import dotenv from "dotenv";
 import connectDB from "./lib/db.js";
 import { app } from "./app.js";
+import connectCloudinary from "./lib/cloudinary.js";
+
 
 
 dotenv.config();
@@ -12,8 +14,8 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    // await connectCloudinary();
-    // console.log("✅ Cloudinary Connected");
+    await connectCloudinary();
+    console.log("✅ Cloudinary Connected");
 
     const port = process.env.PORT || 3000; // Fallback to 3000 if PORT is not set
     app.listen(port, "0.0.0.0", () => {
