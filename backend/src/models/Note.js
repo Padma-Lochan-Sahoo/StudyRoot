@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import { formatDate } from "../controllers/notes.controller.js";
 const noteSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -18,8 +18,8 @@ const noteSchema = new mongoose.Schema({
     type: String,
   },
   uploadDate: {
-    type: Date,
-    default: Date.now,
+    type: String,
+    default: () => formatDate(new Date()),
   },
   subject: {
     type: mongoose.Schema.Types.ObjectId,

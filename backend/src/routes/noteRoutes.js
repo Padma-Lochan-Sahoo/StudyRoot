@@ -4,10 +4,10 @@ import {
   uploadNote,
   downloadNote,
   viewNote,
+  getNameByUserId,
   getNotesBySubject,
 } from "../controllers/notes.controller.js";
 import { isAdmin, protectRoute } from "../middleware/auth.moddleware.js";
-import { get } from "mongoose";
 // import { createNote, getAllNotes, getNoteById, updateNote, deleteNote } from '../controllers/note.controller.js';
 
 const router = express.Router();
@@ -22,6 +22,7 @@ router.post(
 router.get("/download/:id", downloadNote);
 router.get("/view/:id", viewNote);
 router.get("/subject/:subjectId", getNotesBySubject);
+router.get("/name/:id", getNameByUserId);
 
 // router.post('/', createNote);
 // router.get('/', getAllNotes);

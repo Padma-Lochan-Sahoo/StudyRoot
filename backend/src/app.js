@@ -18,9 +18,6 @@ app.get("/", (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.get("/", (req, res) => {
-  res.send("Server is running");
-});
 
 // Import routes
 import authRoute from "./routes/auth.route.js";
