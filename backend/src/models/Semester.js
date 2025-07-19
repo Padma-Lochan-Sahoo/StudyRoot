@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const semesterSchema = new mongoose.Schema({
   number: {
@@ -7,10 +7,13 @@ const semesterSchema = new mongoose.Schema({
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+    ref: "Course",
     required: true,
   },
 });
 
-const Semester = mongoose.model('Semester', semesterSchema);
+// ✅ Ensure uniqueness: one semester number per course
+semesterSchema.index({ number: 1, course: 1 }, { unique: true });
+
+const Semester = mongoose.model("Semester", semesterSchema);
 export default Semester;

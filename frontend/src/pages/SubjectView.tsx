@@ -1,168 +1,140 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, ChevronRight, Home, Download, FileText, Search, BookOpen, Eye, Calendar, User } from "lucide-react";
-import UserDropdown from "@/components/UserDropdown";
 import StarRating from "@/components/StarRating";
-import Navbar from "@/components/Navbar"; 
+import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/useAuthStore";
+import axios from "@/lib/axiosInstance"; // or just "axios" if not using custom instance
 
 const SubjectView = () => {
   const { course, semester, subject } = useParams();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
   const { authUser } = useAuthStore();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [courseName, setCourseName] = useState<string>('');
+  const [semesterName, setSemesterName] = useState<string>('');
+  const [subjectName, setSubjectName] = useState<string>('');
+  const [notes, setNotes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getCourseName = (courseId: string) => {
-    const courseNames: Record<string, string> = {
-      'btech': 'B.Tech',
-      'mca': 'MCA',
-      'bca': 'BCA',
-      'mba': 'MBA',
-      'others': 'Others'
+  // Fetch subject name
+  useEffect(() => {
+    const fetchSubjectName = async () => {
+      try {
+        const res = await axios.get(`/subjects/${subject}`);
+        setSubjectName(res.data.name);
+      } catch (err) {
+        console.error("Failed to fetch subject name", err);
+      }
     };
-    return courseNames[courseId] || courseId;
-  };
+    if (subject) fetchSubjectName();
+  }, [subject]);
 
-  const getSubjectName = (subjectId: string) => {
-    const subjectNames: Record<string, string> = {
-      'math1': 'Mathematics I',
-      'physics': 'Physics',
-      'chemistry': 'Chemistry',
-      'english': 'English',
-      'dsa': 'Data Structures',
-      'dbms': 'DBMS',
-      'oop': 'Object Oriented Programming',
-      'os': 'Operating Systems'
+  // Fetch course name
+  useEffect(() => {
+    const fetchCourseName = async () => {
+      try {
+        const res = await axios.get(`/courses/${course}`);
+        setCourseName(res.data.name);
+      } catch (err) {
+        console.error("Failed to fetch course name", err);
+      }
     };
-    return subjectNames[subjectId] || subjectId;
-  };
+    if (course) fetchCourseName();
+  }, [course]);
 
-  const getFileTypeColor = (format: string) => {
+  // FIXED: Watch semester, not course
+  useEffect(() => {
+    const fetchSemesterName = async () => {
+      try {
+        const res = await axios.get(`/semesters/${semester}`);
+        setSemesterName(res.data.number);
+      } catch (err) {
+        console.error("Failed to fetch semester name", err);
+      }
+    };
+    if (semester) fetchSemesterName();
+  }, [semester]);
+
+  // Fetch notes
+  useEffect(() => {
+    const fetchNotes = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`/notes/subject/${subject}`);
+        setNotes(res.data);
+      } catch (err) {
+        console.error("Failed to fetch notes", err);
+        setError("Failed to fetch notes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (subject) fetchNotes();
+  }, [subject]);
+
+  const getFileTypeColor = (format: string = "") => {
     switch (format.toUpperCase()) {
-      case 'PDF':
-        return 'border-l-red-500';
-      case 'DOCX':
-        return 'border-l-blue-500';
-      case 'PPTX':
-        return 'border-l-yellow-500';
+      case "PDF":
+        return "border-l-red-500";
+      case "DOCX":
+        return "border-l-blue-500";
+      case "PPTX":
+        return "border-l-yellow-500";
       default:
-        return 'border-l-gray-500';
+        return "border-l-gray-500";
     }
   };
 
-  // Sample notes data with enhanced information
-  const notes = [
-    {
-      id: 1,
-      title: "Introduction to Data Structures",
-      uploadedBy: "Dr. Sarah Johnson",
-      format: "PDF",
-      size: "2.5 MB",
-      downloads: 1250,
-      uploadDate: "2024-01-15",
-      rating: 4.5,
-      totalRatings: 23
-    },
-    {
-      id: 2,
-      title: "Arrays and Linked Lists - Complete Guide",
-      uploadedBy: "Prof. Kumar Singh",
-      format: "PDF",
-      size: "3.2 MB",
-      downloads: 980,
-      uploadDate: "2024-01-12",
-      rating: 4.2,
-      totalRatings: 18
-    },
-    {
-      id: 3,
-      title: "Stack and Queue Operations",
-      uploadedBy: "UniNote Team",
-      format: "DOCX",
-      size: "1.8 MB",
-      downloads: 756,
-      uploadDate: "2024-01-10",
-      rating: 4.0,
-      totalRatings: 15
-    },
-    {
-      id: 4,
-      title: "Tree Data Structures and Algorithms",
-      uploadedBy: "Dr. Amit Singh",
-      format: "PDF",
-      size: "4.1 MB",
-      downloads: 1120,
-      uploadDate: "2024-01-08",
-      rating: 4.7,
-      totalRatings: 31
-    },
-    {
-      id: 5,
-      title: "Graph Algorithms Presentation",
-      uploadedBy: "Prof. Lisa Chen",
-      format: "PPTX",
-      size: "3.7 MB",
-      downloads: 894,
-      uploadDate: "2024-01-05",
-      rating: 4.3,
-      totalRatings: 27
-    }
-  ];
-
-  const filteredNotes = notes.filter(note =>
+  const filteredNotes = notes.filter((note) =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDownload = (noteId: number, title: string) => {
-    console.log(`Downloading note: ${title}`);
+  const handleView = (noteId: string) => {
+    window.open(`/api/notes/view/${noteId}`, "_blank");
   };
 
-  const handleView = (noteId: number, title: string) => {
-    console.log(`Viewing note: ${title}`);
+  const handleDownload = (noteId: string) => {
+    window.open(`/api/notes/download/${noteId}`, "_blank");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
-      {/* Navigation */}
+      {/* Navbar */}
       <Navbar userName={authUser?.fullName || "Guest"} />
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <nav className="flex items-center space-x-2 text-sm text-gray-600">
-          <Link to="/dashboard" className="flex items-center hover:text-uninote-blue transition-colors">
-            <Home className="h-4 w-4 mr-1" />
-            Dashboard
+          <Link to="/dashboard" className="flex items-center hover:text-uninote-blue">
+            <Home className="h-4 w-4 mr-1" /> Dashboard
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to={`/dashboard/${course}`} className="hover:text-uninote-blue transition-colors">
-            {getCourseName(course || '')}
+          <Link to={`/dashboard/${course}`} className="hover:text-uninote-blue">{courseName}</Link>
+          <ChevronRight className="h-4 w-4" />
+          <Link to={`/dashboard/${course}/${semester}`} className="hover:text-uninote-blue">
+            Semester {semesterName}
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to={`/dashboard/${course}/${semester}`} className="hover:text-uninote-blue transition-colors">
-            Semester {semester}
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="font-medium text-gray-800">{getSubjectName(subject || '')}</span>
+          <span className="font-medium text-gray-800">{subjectName}</span>
         </nav>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            {getSubjectName(subject || '')}{" "}
-            <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-              Notes
-            </span>
+            {subjectName}{" "}
+            <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">Notes</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Download verified study materials and notes for {getSubjectName(subject || '')}.
+            Download verified study materials and notes for {subjectName}.
           </p>
         </div>
 
@@ -180,48 +152,57 @@ const SubjectView = () => {
           </div>
         </div>
 
+        {/* Loading/Error */}
+        {loading && (
+          <div className="text-center text-gray-500 py-10">Loading notes...</div>
+        )}
+        {error && (
+          <div className="text-center text-red-500 py-6">{error}</div>
+        )}
+
         {/* Notes List */}
-        {filteredNotes.length > 0 ? (
+        {!loading && !error && filteredNotes.length > 0 ? (
           <div className="space-y-4">
             {filteredNotes.map((note) => (
-              <Card 
-                key={note.id}
-                className={`bg-white/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.format)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
+              <Card
+                key={note._id}
+                className={`bg-white/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.fileFormat)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
-                    {/* Left section - File icon */}
                     <div className="flex items-center space-x-4">
                       <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl">
                         <FileText className="h-6 w-6 text-white" />
                       </div>
-                      
-                      {/* Center section - Note details */}
+
                       <div className="flex-1">
                         <h3 className="text-lg font-bold text-gray-800 mb-2">{note.title}</h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                           <span className="bg-gray-100 px-2 py-1 rounded-full font-medium">
-                            {note.format}
+                            {note.fileFormat}
                           </span>
-                          <span>{note.size}</span>
+                          <span>{note.fileSize}</span>
                           <div className="flex items-center space-x-1">
                             <User className="h-3 w-3" />
-                            <span>{note.uploadedBy}</span>
+                            <span>{note.uploadedBy?.fullName || "Unknown"}</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-3 w-3" />
-                            <span>{new Date(note.uploadDate).toLocaleDateString()}</span>
+                            <span>{note.uploadDate}</span>
                           </div>
                         </div>
-                        <StarRating rating={note.rating} totalRatings={note.totalRatings} size="sm" />
+                        <StarRating
+                          rating={note.rating || 0}
+                          totalRatings={note.totalRatings || 0}
+                          size="sm"
+                        />
                       </div>
                     </div>
 
-                    {/* Right section - Action buttons */}
                     <div className="flex flex-col items-end space-y-2">
                       <div className="flex space-x-2">
-                        <Button 
-                          onClick={() => handleView(note.id, note.title)}
+                        <Button
+                          onClick={() => handleView(note._id)}
                           variant="outline"
                           size="sm"
                           className="flex items-center space-x-1 border-uninote-blue text-uninote-blue hover:bg-uninote-blue hover:text-white"
@@ -229,8 +210,8 @@ const SubjectView = () => {
                           <Eye className="h-4 w-4" />
                           <span>View</span>
                         </Button>
-                        <Button 
-                          onClick={() => handleDownload(note.id, note.title)}
+                        <Button
+                          onClick={() => handleDownload(note._id)}
                           size="sm"
                           className="flex items-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue"
                         >
@@ -247,20 +228,19 @@ const SubjectView = () => {
               </Card>
             ))}
           </div>
-        ) : (
+        ) : !loading && !error ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
               <BookOpen className="h-12 w-12 text-gray-400" />
             </div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">No Notes Found</h3>
             <p className="text-gray-600 max-w-md mx-auto">
-              {searchQuery 
+              {searchQuery
                 ? `No notes match your search for "${searchQuery}"`
-                : "No notes have been uploaded for this subject yet. Check back later!"
-              }
+                : "No notes have been uploaded for this subject yet. Check back later!"}
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

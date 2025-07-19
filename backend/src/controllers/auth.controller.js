@@ -1,19 +1,15 @@
 import bcrypt from "bcryptjs";
 import Otp from "../models/otp.model.js";
-import User from "../models/user.model.js"
+import User from "../models/user.model.js";
 import { generateOTP, sendOtpEmail, generateToken } from "../lib/utils.js";
-
-
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
-
 
   try {
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
 
     if (password.length < 6) {
       return res
@@ -21,23 +17,19 @@ export const signup = async (req, res) => {
         .json({ message: "Password must be at least 6 characters" });
     }
 
-
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-
     // Remove previous OTPs
     await Otp.deleteMany({ email });
-
 
     const otp = generateOTP();
     const salt = await bcrypt.genSalt(10);
     const hashedOTP = await bcrypt.hash(otp, salt);
 
     const hashedPassword = await bcrypt.hash(password, salt);
-
 
     const otpDoc = new Otp({
       email,
@@ -46,10 +38,8 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
 
-
     await otpDoc.save();
     await sendOtpEmail(email, otp);
-
 
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (err) {
@@ -62,15 +52,12 @@ export const signup = async (req, res) => {
 export const verifyotp = async (req, res) => {
   const { email, otp } = req.body;
 
-
   try {
     if (!email || !otp) {
       return res.status(400).json({ message: "Email and OTP are required" });
     }
 
-
     const otpDoc = await Otp.findOne({ email });
-
 
     if (!otpDoc) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
@@ -88,11 +75,9 @@ export const verifyotp = async (req, res) => {
       return res.status(400).json({ message: "OTP expired" });
     }
 
-
     if (otpDoc.verified) {
       return res.status(400).json({ message: "OTP already verified" });
     }
-
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -100,21 +85,17 @@ export const verifyotp = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-
     const newUser = await User.create({
       fullName: otpDoc.fullName,
       email: otpDoc.email,
       password: otpDoc.password,
     });
 
-
     otpDoc.verified = true;
     await otpDoc.save();
     await Otp.deleteOne({ _id: otpDoc._id });
 
-
     const token = generateToken(newUser._id, res);
-
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -131,32 +112,26 @@ export const verifyotp = async (req, res) => {
   }
 };
 
-
 // Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
-
 
   try {
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-
     const token = generateToken(user._id, res);
-
 
     return res.status(200).json({
       message: "Login successful",
@@ -186,13 +161,11 @@ export const logout = (req, res) => {
   }
 };
 
-
-
-export const checkAuth = (req,res) => {
-    try {
-      return res.status(200).json(req.user)   
-    } catch (error) {
-      console.log(`Error in check Auth Controller ${error.message}`);
-      return res.status(500).json({ message: "Internal server Error"})
-    }
-}
+export const checkAuth = (req, res) => {
+  try {
+    return res.status(200).json(req.user);
+  } catch (error) {
+    console.log(`Error in check Auth Controller ${error.message}`);
+    return res.status(500).json({ message: "Internal server Error" });
+  }
+};

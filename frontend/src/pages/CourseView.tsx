@@ -7,6 +7,8 @@ import { GraduationCap, ChevronRight, Home, Calendar } from "lucide-react";
 import UserDropdown from "@/components/UserDropdown";
 import Navbar from "@/components/Navbar"; 
 import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from "react";
+import axios from "@/lib/axiosInstance"; // or just "axios" if not using custom instance
 
 const CourseView = () => {
   const { course } = useParams();
@@ -25,33 +27,38 @@ const CourseView = () => {
     return courseNames[courseId] || courseId;
   };
 
-  const getSemesters = (courseId: string) => {
-    const semesterData: Record<string, { number: number; subjects: number }[]> = {
-      'mba': [
-        { number: 1, subjects: 6 },
-        { number: 2, subjects: 6 },
-        { number: 3, subjects: 5 },
-        { number: 4, subjects: 4 }
-      ],
-      'btech': [
-        { number: 1, subjects: 4 },
-        { number: 2, subjects: 4 },
-        { number: 3, subjects: 4 },
-        { number: 4, subjects: 5 },
-        { number: 5, subjects: 6 },
-        { number: 6, subjects: 6 },
-        { number: 7, subjects: 5 },
-        { number: 8, subjects: 4 }
-      ]
-    };
+ 
+  const [semesters, setSemesters] = useState<{ _id: string, number: number }[]>([]);
+const [loading, setLoading] = useState(true);
+const [courseName, setCourseName] = useState<string>('');
 
-    return semesterData[courseId] || Array.from({ length: 8 }, (_, i) => ({ 
-      number: i + 1, 
-      subjects: Math.floor(Math.random() * 3) + 4 
-    }));
+useEffect(() => {
+  const fetchCourseName = async () => {
+    try {
+      const res = await axios.get(`/courses/${course}`);
+      setCourseName(res.data.name); 
+    } catch (err) {
+      console.error("Failed to fetch course name", err);
+    }
+  };
+  if (course) fetchCourseName();
+}, [course]);
+
+useEffect(() => {
+  const fetchSemesters = async () => {
+    try {
+      const res = await axios.get(`/semesters/course/${course}`);
+      setSemesters(res.data);
+    } catch (err) {
+      console.error("Failed to fetch semesters", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const semesters = getSemesters(course || '');
+  if (course) fetchSemesters();
+}, [course]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
@@ -66,7 +73,7 @@ const CourseView = () => {
             Dashboard
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="font-medium text-gray-800">{getCourseName(course || '')}</span>
+          <span className="font-medium text-gray-800">{getCourseName(courseName || '')}</span>
         </nav>
       </div>
 
@@ -75,7 +82,7 @@ const CourseView = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            {getCourseName(course || '')}{" "}
+            {getCourseName(courseName || '')}{" "}
             <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
               Semesters
             </span>
@@ -91,7 +98,7 @@ const CourseView = () => {
             <Card 
               key={semesterData.number}
               className="group bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:translate-y-[-4px] cursor-pointer"
-              onClick={() => navigate(`/dashboard/${course}/${semesterData.number}`)}
+onClick={() => navigate(`/dashboard/${course}/semester/${semesterData._id}`)}
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-uninote-blue to-uninote-purple flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -101,11 +108,13 @@ const CourseView = () => {
                   Semester {semesterData.number}
                 </CardTitle>
                 <div className="text-sm text-gray-500 mt-2">
-                  Total Subjects: {semesterData.subjects}
+                  Total Subjects: 
                 </div>
               </CardHeader>
               <CardContent className="text-center">
                 <Button 
+                  onClick={() => navigate(`/dashboard/${course}/semester/${semesterData._id}`)}
+
                   className="w-full bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300"
                 >
                   View Subjects

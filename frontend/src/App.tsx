@@ -105,14 +105,15 @@ const ADMIN_ONLY = ["admin"];
       </ProtectedRoute>
     }
   />
-  <Route
-    path="/dashboard/:course/:semester"
-    element={
-      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-        <SemesterView />
-      </ProtectedRoute>
-    }
-  />
+<Route
+  path="/dashboard/:course/semester/:semester"
+  element={
+    <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+      <SemesterView />
+    </ProtectedRoute>
+  }
+/>
+
   <Route
     path="/dashboard/:course/:semester/:subject"
     element={

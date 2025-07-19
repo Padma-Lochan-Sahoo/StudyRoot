@@ -1,6 +1,4 @@
-
-
-import Subject from '../models/Subject.js';
+import Subject from "../models/Subject.js";
 
 // Get all subjects
 export const getAllSubjects = async (req, res) => {
@@ -8,7 +6,7 @@ export const getAllSubjects = async (req, res) => {
     const subjects = await Subject.find();
     res.status(200).json(subjects);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching subjects', error });
+    res.status(500).json({ message: "Error fetching subjects", error });
   }
 };
 
@@ -19,7 +17,7 @@ export const createSubject = async (req, res) => {
     await subject.save();
     res.status(201).json(subject);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating subject', error });
+    res.status(400).json({ message: "Error creating subject", error });
   }
 };
 
@@ -28,24 +26,26 @@ export const getSubjectById = async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id);
     if (!subject) {
-      return res.status(404).json({ message: 'Subject not found' });
+      return res.status(404).json({ message: "Subject not found" });
     }
     res.status(200).json(subject);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching subject', error });
+    res.status(500).json({ message: "Error fetching subject", error });
   }
 };
 
 // Update a subject by ID
 export const updateSubject = async (req, res) => {
   try {
-    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!subject) {
-      return res.status(404).json({ message: 'Subject not found' });
+      return res.status(404).json({ message: "Subject not found" });
     }
     res.status(200).json(subject);
   } catch (error) {
-    res.status(400).json({ message: 'Error updating subject', error });
+    res.status(400).json({ message: "Error updating subject", error });
   }
 };
 
@@ -54,10 +54,22 @@ export const deleteSubject = async (req, res) => {
   try {
     const subject = await Subject.findByIdAndDelete(req.params.id);
     if (!subject) {
-      return res.status(404).json({ message: 'Subject not found' });
+      return res.status(404).json({ message: "Subject not found" });
     }
-    res.status(200).json({ message: 'Subject deleted successfully' });
+    res.status(200).json({ message: "Subject deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting subject', error });
+    res.status(500).json({ message: "Error deleting subject", error });
   }
-}; 
+};
+
+export const getSubjectBySemester = async (req, res) => {
+  const { semesterId } = req.params;
+  try {
+    const subjects = await Subject.find({ semester: semesterId });
+    res.status(200).json(subjects);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching subjects for semester", error });
+  }
+};

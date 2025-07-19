@@ -1,28 +1,45 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const noteSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
   },
-  description: {
+  fileFormat: {
     type: String,
+    required: true,
+    enum: ["pdf", "docx", "txt", "pptx", "xlsx"],
   },
   fileUrl: {
     type: String,
     required: true,
   },
+  fileSize: {
+    type: String,
+  },
+  uploadDate: {
+    type: Date,
+    default: Date.now,
+  },
   subject: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Subject',
+    ref: "Subject",
     required: true,
   },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
+  },
+  downloads: {
+    type: Number,
+    default: 0,
   },
 });
 
-const Note = mongoose.model('Note', noteSchema);
+// ✅ Prevent duplicate note titles under the same subject
+noteSchema.index({ title: 1, subject: 1 }, { unique: true });
+noteSchema.index({ fileUrl: 1, subject: 1 }, { unique: true });
+
+const Note = mongoose.model("Note", noteSchema);
 export default Note;
