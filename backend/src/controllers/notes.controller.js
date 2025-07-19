@@ -1,10 +1,21 @@
 import axios from 'axios';
+import User from "../models/user.model.js";
 import Course from "../models/Course.js";
 import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import Note from "../models/Note.js";
 import { streamUpload } from "../lib/cloudinary.js";
 import path from 'path';
+
+// format date
+export const formatDate = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0'); // Months start from 0
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
 
 export const uploadNote = async (req, res) => {
   try {
@@ -55,7 +66,7 @@ export const uploadNote = async (req, res) => {
     if (!['pdf', 'docx', 'txt', 'pptx', 'xlsx'].includes(fileFormat)) {
       return res.status(400).json({ success: false, message: 'Unsupported file format' });
     }
-
+    const now = new Date();
     // Step 6: Create and save Note
     const note = new Note({
       title,
@@ -64,6 +75,7 @@ export const uploadNote = async (req, res) => {
       subject: foundSubject._id,
       uploadedBy: req.user._id,
       fileFormat,
+      uploadDate: formatDate(now),
     });
 
     await note.save();
@@ -116,3 +128,19 @@ export const viewNote = async (req, res) => {
     res.status(500).json({ success: false, message: "Error opening note" });
   }
 };
+
+export const getNameByUserId = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ 
+      success: true, 
+      fullName: user.fullName });
+  } catch (error) {
+    console.error("Get User Name Error:", error);
+    res.status(500).json({ success: false, message: "Error fetching user name" });
+  }
+}
