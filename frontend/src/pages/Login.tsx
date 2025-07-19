@@ -1,4 +1,5 @@
 import { useState,useEffect } from "react";
+import axios from "@/lib/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
@@ -125,8 +126,8 @@ const Login = () => {
                       placeholder="Enter your full name"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      required
                       className="pl-10 h-12 bg-white/50 border-gray-200"
+                      required
                     />
                   </div>
                 </div>
