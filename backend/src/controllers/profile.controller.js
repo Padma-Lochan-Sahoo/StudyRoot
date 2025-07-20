@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import { uploadToCloudinary } from "../lib/cloudinary.js";
+import { uploadProfileImage } from "../lib/cloudinary.js";
 import { ApiError } from "../lib/utils.js";
 import { ApiResponse } from "../lib/utils.js";
 import bcrypt from "bcryptjs";
@@ -138,8 +138,8 @@ const uploadProfilePicture = async (req, res) => {
       throw new ApiError(400, "Profile picture is required");
     }
 
-    // Upload to cloudinary
-    const result = await uploadToCloudinary(req.file.path, "profile-pictures");
+    // Upload to cloudinary using uploadProfileImage for buffer data
+    const result = await uploadProfileImage(req.file.buffer);
 
     if (!result.secure_url) {
       throw new ApiError(500, "Error uploading image to cloudinary");

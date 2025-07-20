@@ -18,7 +18,6 @@ export const streamUpload = (buffer) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: 'studyroot',
-        upload_preset: 'studyroot_public',
         resource_type: 'raw',
         access_mode: "public"
       },
@@ -32,22 +31,26 @@ export const streamUpload = (buffer) => {
   });
 };
 
-// Upload file from path (for profile pictures)
-export const uploadToCloudinary = (filePath, folder = 'profile-pictures') => {
+// Upload profile picture from buffer
+export const uploadProfileImage = (buffer) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(
-      filePath,
+    const stream = cloudinary.uploader.upload_stream(
       {
-        folder: folder,
-        upload_preset: 'studyroot_public',
+        folder: 'profile-pictures',
         resource_type: 'image',
-        access_mode: "public"
+        access_mode: "public",
+        transformation: [
+          { width: 400, height: 400, crop: "fill", gravity: "face" },
+          { quality: "auto", fetch_format: "auto" }
+        ]
       },
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
       }
     );
+
+    streamifier.createReadStream(buffer).pipe(stream);
   });
 };
 

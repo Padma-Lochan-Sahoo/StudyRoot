@@ -57,14 +57,24 @@ interface AuthStore {
   isLoggingIn: boolean;
   isCheckingAuth: boolean;
   isVerifyingOtp: boolean;
+  isForgotPassword: boolean;
+  isVerifyingPasswordResetOtp: boolean;
+  isResettingPassword: boolean;
   otpStep: boolean;
+  forgotPasswordStep: boolean;
+  resetPasswordStep: boolean;
   signupEmail?: string;
+  forgotPasswordEmail?: string;
 
   checkAuth: () => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   verifyOtp: (email: string, otp: string) => Promise<boolean>;
   login: (data: LoginData) => Promise<boolean>;
   logout: () => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<boolean>;
+  verifyPasswordResetOtp: (email: string, otp: string) => Promise<boolean>;
+  resetPassword: (email: string, newPassword: string) => Promise<boolean>;
+  resetForgotPasswordState: () => void;
 }
 
 
@@ -74,7 +84,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isLoggingIn: false,
   isCheckingAuth: true,
   isVerifyingOtp: false,
+  isForgotPassword: false,
+  isVerifyingPasswordResetOtp: false,
+  isResettingPassword: false,
   otpStep: false,
+  forgotPasswordStep: false,
+  resetPasswordStep: false,
 
   checkAuth: async () => {
     try {
@@ -145,5 +160,66 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       toast.error(error?.response?.data?.message || "Logout failed");
       return false;
     }
+  },
+
+  forgotPassword: async (email: string) => {
+    set({ isForgotPassword: true });
+    try {
+      await axios.post("/auth/forgot-password", { email });
+      toast.success("Password reset OTP sent to your email");
+      set({ forgotPasswordStep: true, forgotPasswordEmail: email });
+      return true;
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to send password reset OTP");
+      return false;
+    } finally {
+      set({ isForgotPassword: false });
+    }
+  },
+
+  verifyPasswordResetOtp: async (email: string, otp: string) => {
+    set({ isVerifyingPasswordResetOtp: true });
+    try {
+      await axios.post("/auth/verify-password-reset-otp", { email, otp });
+      toast.success("OTP verified successfully");
+      set({ forgotPasswordStep: false, resetPasswordStep: true });
+      return true;
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "OTP verification failed");
+      return false;
+    } finally {
+      set({ isVerifyingPasswordResetOtp: false });
+    }
+  },
+
+  resetPassword: async (email: string, newPassword: string) => {
+    set({ isResettingPassword: true });
+    try {
+      await axios.post("/auth/reset-password", { email, newPassword });
+      toast.success("Password reset successfully");
+      // Reset all forgot password related states
+      set({ 
+        forgotPasswordStep: false, 
+        resetPasswordStep: false, 
+        forgotPasswordEmail: undefined,
+        isForgotPassword: false,
+        isVerifyingPasswordResetOtp: false,
+        isResettingPassword: false
+      });
+      return true;
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Password reset failed");
+      return false;
+    } finally {
+      set({ isResettingPassword: false });
+    }
+  },
+
+  resetForgotPasswordState: () => {
+    set({ 
+      forgotPasswordStep: false, 
+      resetPasswordStep: false, 
+      forgotPasswordEmail: undefined 
+    });
   },
 }));

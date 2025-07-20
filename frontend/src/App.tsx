@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as HotToaster } from "react-hot-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -55,6 +56,7 @@ const ADMIN_ONLY = ["admin"];
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <HotToaster />
 <Routes>
   <Route
   path="/"

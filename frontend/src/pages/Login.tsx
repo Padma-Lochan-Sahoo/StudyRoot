@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Mail, Lock, User, Key } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Key, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,11 +15,21 @@ const Login = () => {
     signup,
     verifyOtp,
     login,
+    forgotPassword,
+    verifyPasswordResetOtp,
+    resetPassword,
+    resetForgotPasswordState,
     isSigningUp,
     isLoggingIn,
     isVerifyingOtp,
+    isForgotPassword,
+    isVerifyingPasswordResetOtp,
+    isResettingPassword,
     otpStep,
+    forgotPasswordStep,
+    resetPasswordStep,
     signupEmail,
+    forgotPasswordEmail,
     authUser,
   } = useAuthStore();
 
@@ -32,6 +43,15 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
   const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Debug useEffect to monitor state changes
+  useEffect(() => {
+    console.log("State changed:", { forgotPasswordStep, resetPasswordStep, otpStep, isLogin });
+  }, [forgotPasswordStep, resetPasswordStep, otpStep, isLogin]);
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,6 +59,33 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (forgotPasswordStep) {
+      const success = await verifyPasswordResetOtp(forgotPasswordEmail!, otp);
+      if (success) {
+        setOtp("");
+      }
+      return;
+    }
+
+    if (resetPasswordStep) {
+      if (newPassword !== confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+      if (newPassword.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
+      const success = await resetPassword(forgotPasswordEmail!, newPassword);
+      if (success) {
+        console.log("Password reset successful, reloading page...");
+        // Force page reload to show login form
+        window.location.reload();
+      }
+      return;
+    }
+
     if (otpStep) {
       const success = await verifyOtp(signupEmail!, otp);
       if (success) {
@@ -67,6 +114,36 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    const success = await forgotPassword(formData.email);
+    if (success) {
+      setOtp("");
+    }
+  };
+
+  const handleBackToLogin = () => {
+    resetForgotPasswordState();
+    setFormData({ fullName: "", email: "", password: "" });
+    setOtp("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setIsLogin(true);
+  };
+
+  const getCurrentStep = () => {
+    console.log("getCurrentStep called with states:", { forgotPasswordStep, resetPasswordStep, otpStep, isLogin });
+    if (forgotPasswordStep) return "forgot-password-otp";
+    if (resetPasswordStep) return "reset-password";
+    if (otpStep) return "signup-otp";
+    return isLogin ? "login" : "signup";
+  };
+
+  const currentStep = getCurrentStep();
+
   return (
     <div className="min-h-screen flex">
       {/* Left - Motivation */}
@@ -92,6 +169,16 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-uninote-light to-white">
         <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
           <CardHeader className="text-center">
+            {(forgotPasswordStep || resetPasswordStep) && (
+              <button
+                onClick={handleBackToLogin}
+                className="absolute left-4 top-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </button>
+            )}
+            
             <div className="lg:hidden flex items-center justify-center space-x-2 mb-4">
               <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-xl">
                 <GraduationCap className="h-6 w-6 text-white" />
@@ -101,20 +188,25 @@ const Login = () => {
               </span>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {otpStep ? "Verify OTP" : isLogin ? "Welcome Back" : "Join UniNote"}
+              {currentStep === "forgot-password-otp" && "Verify OTP"}
+              {currentStep === "reset-password" && "Reset Password"}
+              {currentStep === "signup-otp" && "Verify OTP"}
+              {currentStep === "login" && "Welcome Back"}
+              {currentStep === "signup" && "Join UniNote"}
             </CardTitle>
             <CardDescription className="text-gray-600">
-              {otpStep
-                ? "Enter the OTP sent to your email"
-                : isLogin
-                ? "Sign in to access your study materials"
-                : "Create your account to get started"}
+              {currentStep === "forgot-password-otp" && "Enter the OTP sent to your email"}
+              {currentStep === "reset-password" && "Enter your new password"}
+              {currentStep === "signup-otp" && "Enter the OTP sent to your email"}
+              {currentStep === "login" && "Sign in to access your study materials"}
+              {currentStep === "signup" && "Create your account to get started"}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!otpStep && !isLogin && (
+              {/* Signup Form Fields */}
+              {currentStep === "signup" && (
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">
@@ -133,7 +225,8 @@ const Login = () => {
                 </div>
               )}
 
-              {!otpStep && (
+              {/* Email and Password Fields (for login, signup, and forgot password) */}
+              {(currentStep === "login" || currentStep === "signup") && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -171,7 +264,8 @@ const Login = () => {
                 </>
               )}
 
-              {otpStep && (
+              {/* OTP Field */}
+              {(currentStep === "signup-otp" || currentStep === "forgot-password-otp") && (
                 <div className="space-y-2">
                   <Label htmlFor="otp">OTP</Label>
                   <div className="relative">
@@ -190,30 +284,84 @@ const Login = () => {
                 </div>
               )}
 
+              {/* Reset Password Fields */}
+              {currentStep === "reset-password" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="newPassword"
+                        name="newPassword"
+                        type="password"
+                        placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
               <Button
                 type="submit"
-                disabled={isSigningUp || isLoggingIn || isVerifyingOtp}
+                disabled={
+                  isSigningUp || 
+                  isLoggingIn || 
+                  isVerifyingOtp || 
+                  isForgotPassword || 
+                  isVerifyingPasswordResetOtp || 
+                  isResettingPassword
+                }
                 className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
-                  isSigningUp || isLoggingIn || isVerifyingOtp
+                  isSigningUp || isLoggingIn || isVerifyingOtp || isForgotPassword || isVerifyingPasswordResetOtp || isResettingPassword
                     ? "opacity-70 cursor-not-allowed"
                     : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
                 }`}
               >
-                {otpStep
-                  ? isVerifyingOtp
-                    ? "Verifying OTP..."
-                    : "Verify OTP"
-                  : isLogin
-                  ? isLoggingIn
-                    ? "Signing In..."
-                    : "Sign In"
-                  : isSigningUp
-                  ? "Creating Account..."
-                  : "Create Account"}
+                {currentStep === "forgot-password-otp" && (isVerifyingPasswordResetOtp ? "Verifying OTP..." : "Verify OTP")}
+                {currentStep === "reset-password" && (isResettingPassword ? "Resetting Password..." : "Reset Password")}
+                {currentStep === "signup-otp" && (isVerifyingOtp ? "Verifying OTP..." : "Verify OTP")}
+                {currentStep === "login" && (isLoggingIn ? "Signing In..." : "Sign In")}
+                {currentStep === "signup" && (isSigningUp ? "Creating Account..." : "Create Account")}
               </Button>
             </form>
 
-            {!otpStep && (
+            {/* Forgot Password Link (only on login) */}
+            {currentStep === "login" && (
+              <div className="text-center">
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={isForgotPassword}
+                  className="text-uninote-blue hover:underline font-medium disabled:opacity-50"
+                >
+                  {isForgotPassword ? "Sending..." : "Forgot Password?"}
+                </button>
+              </div>
+            )}
+
+            {/* Toggle between Login and Signup */}
+            {!otpStep && !forgotPasswordStep && !resetPasswordStep && (
               <div className="text-center">
                 <p className="text-gray-600">
                   {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
