@@ -15,14 +15,35 @@ export const streamUpload = (buffer, originalFilename) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "studyroot",
-        upload_preset: "studyroot_public",
-        resource_type: "raw",
+        folder: 'studyroot',
+        upload_preset: 'studyroot_public',
+        resource_type: 'raw',
         access_mode: "public",
-        // THIS IS THE FIX 👇
-        filename_override: originalFilename,
         use_filename: false,
         unique_filename: true,
+      },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
+// Upload profile picture from buffer
+export const uploadProfileImage = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'profile-pictures',
+        resource_type: 'image',
+        access_mode: "public",
+        transformation: [
+          { width: 400, height: 400, crop: "fill", gravity: "face" },
+          { quality: "auto", fetch_format: "auto" }
+        ]
       },
       (error, result) => {
         if (result) resolve(result);
