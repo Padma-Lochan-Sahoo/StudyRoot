@@ -116,20 +116,33 @@ const SubjectView = () => {
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 const handleView = (note: any) => {
-    if (!note.fileUrl) {
-      toast.error("File URL not found. Cannot view note.");
-      console.error("Missing fileUrl for note:", note);
-      return;
-    }
-    const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(note.fileUrl)}&embedded=true`;
-    window.open(viewerUrl, "_blank");
-    axios.post(`/notes/view/${note._id}`)
-      .then(res => console.log(res.data.message))
-      .catch(err => {
-        console.error("Failed to update view count:", err);
-      });
-  };
+  if (!note.fileUrl) {
+    toast.error("File URL not found. Cannot view note.");
+    console.error("Missing fileUrl for note:", note);
+    return;
+  }
 
+  const fileFormat = note.fileFormat?.toLowerCase();
+  let viewerUrl = "";
+
+  if (fileFormat === "pdf") {
+    viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(note.fileUrl)}&embedded=true`;
+  } else if (["docx", "pptx", "xlsx"].includes(fileFormat)) {
+    viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(note.fileUrl)}`;
+  } else {
+    toast.error("Preview not supported for this file type.");
+    return;
+  }
+
+  window.open(viewerUrl, "_blank");
+
+  // Increment view count
+  axios.get(`/notes/view/${note._id}`)
+    .then(res => console.log(res.data.message))
+    .catch(err => {
+      console.error("Failed to update view count:", err);
+    });
+};
 
   const handleDownload = async (noteId: string, title: string, format: string) => {
     toast.info("Preparing download...");

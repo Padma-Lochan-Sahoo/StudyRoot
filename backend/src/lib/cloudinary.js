@@ -10,19 +10,17 @@ const connectCloudinary = async () => {
   });
 };
 
-// Stream upload function
+// Stream upload function for unsigned preset
 export const streamUpload = (buffer, originalFilename) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "studyroot",
-        upload_preset: "studyroot_public",
-        resource_type: "raw",
-        access_mode: "public",
-        // THIS IS THE FIX 👇
-        filename_override: originalFilename,
-        use_filename: true,
-        unique_filename: false,
+        folder: "studyroot", // ✅ Target folder
+        upload_preset: "studyroot_public", // ✅ Unsigned preset
+        resource_type: "raw", // ✅ For PDF, DOCX, etc.
+        use_filename: true, // ✅ Use original file name
+        unique_filename: true, // ✅ Add random suffix to avoid collisions
+        // ❌ DO NOT use: access_mode or filename_override (invalid for unsigned)
       },
       (error, result) => {
         if (result) resolve(result);

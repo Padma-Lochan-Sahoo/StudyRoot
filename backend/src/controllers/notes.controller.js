@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import Course from "../models/Course.js";
 import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
+import stream from "stream";
 import Note from "../models/Note.js";
 import { streamUpload } from "../lib/cloudinary.js";
 import path from "path";
@@ -35,7 +36,7 @@ export const uploadNote = async (req, res) => {
     const { course, semester, subjectName, title } = req.body;
 
     // Step 1: Get or create Course
-    let foundCourse = await Course.findOne({ name: course });
+    let foundCourse = await Course.findOne({ course });
     if (!foundCourse) {
       foundCourse = await Course.create({ name: course });
     }
@@ -121,75 +122,63 @@ export const uploadNote = async (req, res) => {
     });
   }
 };
-
-//Download Note
-// /controllers/notes.controller.js
-// /controllers/notes.controller.js
-
 export const downloadNote = async (req, res) => {
   try {
     const noteId = req.params.id;
+    console.log("⏬ Download request for Note ID:", noteId);
+
     const note = await Note.findById(noteId);
     if (!note) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Note not found" });
+      console.error("❌ Note not found");
+      return res.status(404).json({ message: "Note not found" });
     }
 
-    console.log("Attempting to download from URL:", note.fileUrl);
-
+    // Increment downloads
+    console.log("✅ Note found. Incrementing downloads...");
     note.downloads = (note.downloads || 0) + 1;
     await note.save();
+
+    console.log("✅ Downloads incremented. Downloading from:", note.fileUrl);
 
     const fileResponse = await axios.get(note.fileUrl, {
       responseType: "stream",
     });
 
-    // Set correct headers so browser understands it's a downloadable file
-    res.setHeader("Content-Type", fileResponse.headers["content-type"]);
+    console.log("✅ File downloaded from Cloudinary. Streaming to user...");
+
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="${note.title}.${note.fileFormat}"`
     );
+    res.setHeader("Content-Type", fileResponse.headers["content-type"]);
 
-    // Pipe stream directly to response
     fileResponse.data.pipe(res);
   } catch (error) {
-    console.error("Download Note Error Details:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong during note download",
-    });
-  }
-};
-
-// viewNote.js (or inside your controller)
-export const viewNote = async (req, res) => {
-  try {
-    const noteId = req.params.id;
-
-    // Use findOneAndUpdate with $inc for an atomic and efficient update.
-    const updatedNote = await Note.findByIdAndUpdate(
-      noteId,
-      { $inc: { views: 1 } },
-      { new: true } // This option returns the document after it has been updated.
+    console.error(
+      "💥 Error in downloadNote:",
+      error?.response?.data || error.message
     );
-
-    if (!updatedNote) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Note not found" });
-    }
-
-    // The view has been successfully counted.
-    res.status(200).json({ success: true, message: "View count incremented." });
-  } catch (error) {
-    console.error("View Note Error (incrementing count):", error.message);
     res
       .status(500)
-      .json({ success: false, message: "Failed to update view count" });
+      .json({ message: "Failed to download note", error: error.message });
   }
 };
+// Increment view count (optional analytics)
+export const viewNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+    if (!note) return res.status(404).json({ message: "Note not found" });
+
+    note.views = (note.views || 0) + 1;
+    await note.save();
+
+    res.status(200).json({ message: "View count updated", url: note.fileUrl });
+  } catch (error) {
+    console.error("View Note Error:", error);
+    res.status(500).json({ message: "Failed to update view count" });
+  }
+};
+
 export const getNameByUserId = async (req, res) => {
   try {
     const userId = req.params.id;
