@@ -18,7 +18,7 @@ export const streamUpload = (buffer, originalFilename) => {
         folder: "studyroot", // ✅ Target folder
         upload_preset: "studyroot_public", // ✅ Unsigned preset
         resource_type: "raw", // ✅ For PDF, DOCX, etc.
-        use_filename: true, // ✅ Use original file name
+        use_filename: false, // ✅ Use original file name
         unique_filename: true, // ✅ Add random suffix to avoid collisions
         // ❌ DO NOT use: access_mode or filename_override (invalid for unsigned)
       },
