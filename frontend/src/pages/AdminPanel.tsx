@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-
+import axios from "@/lib/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,15 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("upload");
+
+const [courses, setCourses] = useState<any[]>([]);
+  const [semesters, setSemesters] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+
+const [isSemesterDisabled, setIsSemesterDisabled] = useState(true);
+const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
+
+
   const [formData, setFormData] = useState({
     course: "",
     semester: "",
@@ -37,6 +46,12 @@ const AdminPanel = () => {
   }
 };
 
+const handleInputChange = (field: string, value: string) => {
+  setFormData(prev => ({
+    ...prev,
+    [field]: value
+  }));
+};
   const uploadedNotes = [
     {
       id: 1,
@@ -58,11 +73,31 @@ const AdminPanel = () => {
     }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+   const handleCourseChange = async (courseId: string) => {
+    handleInputChange("course", courseId);
+    handleInputChange("semester", "");
+    handleInputChange("subject", "");
+    setIsSemesterDisabled(true);
+    setIsSubjectDisabled(true);
+    try {
+      const res = await axios.get(`semesters/course/${courseId}`);
+      setSemesters(res.data || []);
+      setIsSemesterDisabled(false);
+    } catch (err) {
+      console.error("Failed to fetch semesters", err);
+    }
+  };
+  const handleSemesterChange = async (semesterId: string) => {
+    handleInputChange("semester", semesterId);
+    handleInputChange("subject", "");
+    setIsSubjectDisabled(true);
+    try {
+      const res = await axios.get(`subjects/semester/${semesterId}`);
+      setSubjects(res.data || []);
+      setIsSubjectDisabled(false);
+    } catch (err) {
+      console.error("Failed to fetch subjects", err);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,32 +108,45 @@ const AdminPanel = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.course || !formData.semester || !formData.subject || !formData.title || !formData.file) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields and select a file.",
-        variant: "destructive"
-      });
-      return;
+    const { course, semester, subject, title, file } = formData;
+    if (!course || !semester || !subject || !title || !file) {
+      return toast({ title: "Error", description: "Fill in all fields", variant: "destructive" });
     }
 
-    // Simulate upload
-    toast({
-      title: "Success",
-      description: "Note uploaded successfully!",
-    });
+    try {
+      const data = new FormData();
+      data.append("course", course);
+      data.append("semester", semester);
+      data.append("subjectName", subject);
+      data.append("title", title);
+      data.append("file", file);
 
-    // Reset form
-    setFormData({
-      course: "",
-      semester: "",
-      subject: "",
-      title: "",
-      file: null
-    });
+      await axios.post("/notes/upload", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast({ title: "Success", description: "Note uploaded successfully!" });
+
+      setFormData({
+        course: "",
+        semester: "",
+        subject: "",
+        title: "",
+        file: null,
+      });
+      setSemesters([]);
+      setSubjects([]);
+      setIsSemesterDisabled(true);
+      setIsSubjectDisabled(true);
+    } catch (err: any) {
+      toast({
+        title: "Upload Error",
+        description: err.response?.data?.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = (id: number, title: string) => {
@@ -107,7 +155,19 @@ const AdminPanel = () => {
       description: `"${title}" has been deleted.`,
     });
   };
-
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get("/courses");
+        console.log("Fetched courses:", res.data);
+        
+        setCourses(res.data || []);
+      } catch (err) {
+        console.error("Failed to load courses", err);
+      }
+    };
+    fetchCourses();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50 flex">
       {/* Sidebar */}
@@ -182,57 +242,47 @@ const AdminPanel = () => {
       <div className="flex-1 p-8">
         {activeTab === "upload" && (
           <div className="max-w-2xl">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                Upload{" "}
-                <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                  Notes
-                </span>
-              </h1>
-              <p className="text-gray-600">
-                Upload verified study materials for students to access.
-              </p>
-            </div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Upload Notes</h1>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white/80 border-0 shadow-xl">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Plus className="h-5 w-5" />
                   <span>Add New Note</span>
                 </CardTitle>
-                <CardDescription>
-                  Fill in the details below to upload a new study material.
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="course">Course</Label>
-                      <Select value={formData.course} onValueChange={(value) => handleInputChange("course", value)}>
-                        <SelectTrigger className="h-12 bg-white/50 border-gray-200">
+                    <div>
+                      <Label>Course</Label>
+                      <Select value={formData.course} onValueChange={handleCourseChange}>
+                        <SelectTrigger>
                           <SelectValue placeholder="Select Course" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="btech">B.Tech</SelectItem>
-                          <SelectItem value="mca">MCA</SelectItem>
-                          <SelectItem value="bca">BCA</SelectItem>
-                          <SelectItem value="mba">MBA</SelectItem>
-                          <SelectItem value="others">Others</SelectItem>
+                          {courses.map((course) => (
+                            <SelectItem key={course._id} value={course._id}>
+                              {course.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="semester">Semester</Label>
-                      <Select value={formData.semester} onValueChange={(value) => handleInputChange("semester", value)}>
-                        <SelectTrigger className="h-12 bg-white/50 border-gray-200">
+                    <div>
+                      <Label>Semester</Label>
+                      <Select
+                        disabled={isSemesterDisabled}
+                        value={formData.semester}
+                        onValueChange={handleSemesterChange}
+                      >
+                        <SelectTrigger>
                           <SelectValue placeholder="Select Semester" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 8 }, (_, i) => (
-                            <SelectItem key={i + 1} value={String(i + 1)}>
-                              Semester {i + 1}
+                          {semesters.map((sem) => (
+                            <SelectItem key={sem._id} value={sem._id}>
+                              Semester {sem.number}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -240,120 +290,54 @@ const AdminPanel = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      type="text"
-                      placeholder="Enter subject name (e.g., Data Structures, DBMS)"
-                      className="h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
+                  <div>
+                    <Label>Subject</Label>
+                    <Select
+                      disabled={isSubjectDisabled}
                       value={formData.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
-                      required
-                    />
+                      onValueChange={(val) => handleInputChange("subject", val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map((sub) => (
+                          <SelectItem key={sub._id} value={sub.name}>
+                            {sub.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Note Title</Label>
+                  <div>
+                    <Label>Note Title</Label>
                     <Input
-                      id="title"
                       type="text"
-                      placeholder="Enter descriptive title for the note"
-                      className="h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
+                      placeholder="Enter title"
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="file">Upload File</Label>
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-white/50">
-                      <input
-                        id="file"
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={handleFileChange}
-                        className="w-full"
-                        required
-                      />
-                      <p className="text-sm text-gray-500 mt-2">
-                        Supported formats: PDF, DOC, DOCX (Max size: 10MB)
-                      </p>
-                    </div>
+                  <div>
+                    <Label>Upload File</Label>
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.ppt,.pptx"
+                      onChange={handleFileChange}
+                      required
+                    />
                   </div>
 
-                  <Button 
-                    type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300 hover:scale-[1.02]"
-                  >
+                  <Button type="submit" className="w-full">
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Note
                   </Button>
                 </form>
               </CardContent>
             </Card>
-          </div>
-        )}
-
-        {activeTab === "manage" && (
-          <div>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                Manage{" "}
-                <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                  Notes
-                </span>
-              </h1>
-              <p className="text-gray-600">
-                View and manage all uploaded study materials.
-              </p>
-            </div>
-
-            <div className="grid gap-6">
-              {uploadedNotes.map((note) => (
-                <Card key={note.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start space-x-4">
-                        <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl">
-                          <FileText className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-800 mb-1">{note.title}</h3>
-                          <p className="text-gray-600 mb-2">
-                            {note.course} • Semester {note.semester} • {note.subject}
-                          </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <span>Uploaded: {note.uploadDate}</span>
-                            <span>Downloads: {note.downloads}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(note.id, note.title)}
-                          className="border-red-200 text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         )}
       </div>

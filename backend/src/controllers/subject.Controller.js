@@ -65,7 +65,7 @@ export const deleteSubject = async (req, res) => {
 export const getSubjectBySemester = async (req, res) => {
   const { semesterId } = req.params;
   try {
-    const subjects = await Subject.find({ semester: semesterId });
+    const subjects = await Subject.find({ semester: semesterId }).sort({ number: 1 });
     res.status(200).json(subjects);
   } catch (error) {
     res

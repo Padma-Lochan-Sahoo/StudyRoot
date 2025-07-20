@@ -64,7 +64,7 @@ export const deleteSemester = async (req, res) => {
 export const getSemestersByCourse = async (req, res) => {
   const { courseId } = req.params;
   try {
-    const semesters = await Semester.find({ course: courseId });
+    const semesters = await Semester.find({ course: courseId }).sort({ number: 1 });
     res.status(200).json(semesters);
   } catch (error) {
     res
