@@ -25,12 +25,15 @@ import courseRoute from "./routes/courseRoutes.js";
 import semesterRoute from "./routes/semesterRoutes.js";
 import subjectRoute from "./routes/subjectRoutes.js";
 import noteRoute from "./routes/noteRoutes.js";
+import profileRoute from "./routes/profileRoutes.js";
 
 // routes declaration
 app.use("/api/auth", authRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/semesters", semesterRoute);
 app.use("/api/subjects", subjectRoute);
+// app.use("/api/notes", noteRoute);
 app.use("/api/notes", noteRoute);
+app.use("/api/profile", profileRoute);
 
 export { app };

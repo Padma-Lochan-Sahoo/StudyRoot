@@ -9,12 +9,14 @@ import CourseView from "./pages/CourseView";
 import SemesterView from "./pages/SemesterView";
 import SubjectView from "./pages/SubjectView";
 import AdminPanel from "./pages/AdminPanel";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as HotToaster } from "react-hot-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -54,6 +56,7 @@ const ADMIN_ONLY = ["admin"];
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <HotToaster />
 <Routes>
   <Route
   path="/"
@@ -119,6 +122,16 @@ const ADMIN_ONLY = ["admin"];
     element={
       <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
         <SubjectView />
+      </ProtectedRoute>
+    }
+  />
+
+  {/* Profile route for all authenticated users */}
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <Profile />
       </ProtectedRoute>
     }
   />

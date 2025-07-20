@@ -1,13 +1,22 @@
+// AdminPanel.tsx
 
 import { useEffect, useState } from "react";
-
+import axios from "@/lib/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GraduationCap, Upload, FileText, Edit, Trash2, Plus, LogOut, Users, BookOpen, Settings } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  GraduationCap, Upload, FileText, Edit, Trash2, Plus, LogOut, Users, BookOpen, Settings
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -16,89 +25,126 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("upload");
+  const [loading, setLoading] = useState(false);
+
+  const [courses, setCourses] = useState<any[]>([]);
+  const [semesters, setSemesters] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [uploadedNotes, setUploadedNotes] = useState<any[]>([]);
+
+
+  const [isSemesterDisabled, setIsSemesterDisabled] = useState(true);
+  const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
+
   const [formData, setFormData] = useState({
     course: "",
     semester: "",
     subject: "",
     title: "",
-    file: null as File | null
+    file: null as File | null,
   });
 
-
   const handleLogout = async () => {
-  try {
-    await logout();
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("authUser");
-    navigate("/"); // send user back to login
-  } catch (err: any) {
-    console.error("Logout Error ❌", err.response?.data?.message || err.message);
-    alert("Something went wrong while logging out.");
-  }
-};
-
-  const uploadedNotes = [
-    {
-      id: 1,
-      title: "Introduction to Data Structures",
-      course: "B.Tech",
-      semester: "3",
-      subject: "DSA",
-      uploadDate: "2024-01-15",
-      downloads: 1250
-    },
-    {
-      id: 2,
-      title: "Database Management Systems",
-      course: "B.Tech",
-      semester: "4",
-      subject: "DBMS",
-      uploadDate: "2024-01-10",
-      downloads: 980
+    try {
+      await logout();
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authUser");
+      navigate("/");
+    } catch (err: any) {
+      console.error("Logout Error ❌", err.response?.data?.message || err.message);
+      alert("Something went wrong while logging out.");
     }
-  ];
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
+  };
+
+  const handleCourseChange = async (courseId: string) => {
+    handleInputChange("course", courseId);
+    handleInputChange("semester", "");
+    handleInputChange("subject", "");
+    setIsSemesterDisabled(true);
+    setIsSubjectDisabled(true);
+    try {
+      const res = await axios.get(`semesters/course/${courseId}`);
+      setSemesters(res.data || []);
+      setIsSemesterDisabled(false);
+    } catch (err) {
+      console.error("Failed to fetch semesters", err);
+    }
+  };
+
+  const handleSemesterChange = async (semesterId: string) => {
+    handleInputChange("semester", semesterId);
+    handleInputChange("subject", "");
+    setIsSubjectDisabled(true);
+    try {
+      const res = await axios.get(`subjects/semester/${semesterId}`);
+      setSubjects(res.data || []);
+      setIsSubjectDisabled(false);
+    } catch (err) {
+      console.error("Failed to fetch subjects", err);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      file
+      file,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.course || !formData.semester || !formData.subject || !formData.title || !formData.file) {
-      toast({
+    const { course, semester, subject, title, file } = formData;
+    if (!course || !semester || !subject || !title || !file) {
+      return toast({
         title: "Error",
-        description: "Please fill in all fields and select a file.",
-        variant: "destructive"
+        description: "Fill in all fields",
+        variant: "destructive",
       });
-      return;
     }
 
-    // Simulate upload
-    toast({
-      title: "Success",
-      description: "Note uploaded successfully!",
-    });
+    try {
+      setLoading(true);
+      const data = new FormData();
+      data.append("course", course);
+      data.append("semester", semester);
+      data.append("subjectName", subject);
+      data.append("title", title);
+      data.append("file", file);
 
-    // Reset form
-    setFormData({
-      course: "",
-      semester: "",
-      subject: "",
-      title: "",
-      file: null
-    });
+      await axios.post("/notes/upload", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast({ title: "Success", description: "Note uploaded successfully!" });
+
+      setFormData({
+        course: "",
+        semester: "",
+        subject: "",
+        title: "",
+        file: null,
+      });
+      setSemesters([]);
+      setSubjects([]);
+      setIsSemesterDisabled(true);
+      setIsSubjectDisabled(true);
+    } catch (err: any) {
+      toast({
+        title: "Upload Error",
+        description: err.response?.data?.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = (id: number, title: string) => {
@@ -107,6 +153,33 @@ const AdminPanel = () => {
       description: `"${title}" has been deleted.`,
     });
   };
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get("/courses");
+        setCourses(res.data || []);
+      } catch (err) {
+        console.error("Failed to load courses", err);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+  if (activeTab === "manage") {
+    const fetchNotes = async () => {
+      try {
+        const res = await axios.get("/notes");
+        setUploadedNotes(res.data || []);
+      } catch (err) {
+        console.error("Error fetching notes", err);
+      }
+    };
+    fetchNotes();
+  }
+}, [activeTab]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50 flex">
@@ -123,32 +196,28 @@ const AdminPanel = () => {
           </div>
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-yellow-800 font-medium">
-              🔒 Admin Panel
-            </p>
-            <p className="text-xs text-yellow-700 mt-1">
-              Administrative access only
-            </p>
+            <p className="text-sm text-yellow-800 font-medium">🔒 Admin Panel</p>
+            <p className="text-xs text-yellow-700 mt-1">Administrative access only</p>
           </div>
 
           <nav className="space-y-2">
             <button
               onClick={() => setActiveTab("upload")}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                activeTab === "upload" 
-                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white" 
+                activeTab === "upload"
+                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               <Upload className="h-5 w-5" />
               <span>Upload Notes</span>
             </button>
-            
+
             <button
               onClick={() => setActiveTab("manage")}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                activeTab === "manage" 
-                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white" 
+                activeTab === "manage"
+                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
@@ -167,8 +236,8 @@ const AdminPanel = () => {
         </div>
 
         <div className="absolute bottom-6 left-6 right-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleLogout}
             className="w-full flex items-center space-x-2 border-red-200 text-red-600 hover:bg-red-50"
           >
@@ -179,60 +248,58 @@ const AdminPanel = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 flex justify-center items-start p-10">
         {activeTab === "upload" && (
-          <div className="max-w-2xl">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                Upload{" "}
-                <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
-                  Notes
-                </span>
-              </h1>
-              <p className="text-gray-600">
-                Upload verified study materials for students to access.
-              </p>
-            </div>
+          <div className="w-full max-w-2xl">
+            <h1 className="text-3xl font-bold text-gray-800 mb-1">
+              Upload <span className="text-uninote-purple">Notes</span>
+            </h1>
+            <p className="text-gray-500 mb-6">
+              Upload verified study materials for students to access.
+            </p>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <Card className="bg-white shadow-lg rounded-xl border border-gray-100">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800">
                   <Plus className="h-5 w-5" />
                   <span>Add New Note</span>
                 </CardTitle>
-                <CardDescription>
+                <p className="text-sm text-gray-500 mt-1">
                   Fill in the details below to upload a new study material.
-                </CardDescription>
+                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="course">Course</Label>
-                      <Select value={formData.course} onValueChange={(value) => handleInputChange("course", value)}>
-                        <SelectTrigger className="h-12 bg-white/50 border-gray-200">
+                    <div>
+                      <Label>Course</Label>
+                      <Select value={formData.course} onValueChange={handleCourseChange}>
+                        <SelectTrigger>
                           <SelectValue placeholder="Select Course" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="btech">B.Tech</SelectItem>
-                          <SelectItem value="mca">MCA</SelectItem>
-                          <SelectItem value="bca">BCA</SelectItem>
-                          <SelectItem value="mba">MBA</SelectItem>
-                          <SelectItem value="others">Others</SelectItem>
+                          {courses.map((course) => (
+                            <SelectItem key={course._id} value={course._id}>
+                              {course.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="semester">Semester</Label>
-                      <Select value={formData.semester} onValueChange={(value) => handleInputChange("semester", value)}>
-                        <SelectTrigger className="h-12 bg-white/50 border-gray-200">
+                    <div>
+                      <Label>Semester</Label>
+                      <Select
+                        disabled={isSemesterDisabled}
+                        value={formData.semester}
+                        onValueChange={handleSemesterChange}
+                      >
+                        <SelectTrigger>
                           <SelectValue placeholder="Select Semester" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 8 }, (_, i) => (
-                            <SelectItem key={i + 1} value={String(i + 1)}>
-                              Semester {i + 1}
+                          {semesters.map((sem) => (
+                            <SelectItem key={sem._id} value={sem._id}>
+                              Semester {sem.number}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -240,55 +307,85 @@ const AdminPanel = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      type="text"
-                      placeholder="Enter subject name (e.g., Data Structures, DBMS)"
-                      className="h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
+                  <div>
+                    <Label>Subject</Label>
+                    <Select
+                      disabled={isSubjectDisabled}
                       value={formData.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
-                      required
-                    />
+                      onValueChange={(val) => handleInputChange("subject", val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map((sub) => (
+                          <SelectItem key={sub._id} value={sub.name}>
+                            {sub.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Note Title</Label>
+                  <div>
+                    <Label>Note Title</Label>
                     <Input
-                      id="title"
                       type="text"
-                      placeholder="Enter descriptive title for the note"
-                      className="h-12 bg-white/50 border-gray-200 focus:border-uninote-blue"
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
+                      placeholder="Enter descriptive title for the note"
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="file">Upload File</Label>
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 bg-white/50">
-                      <input
-                        id="file"
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={handleFileChange}
-                        className="w-full"
-                        required
-                      />
-                      <p className="text-sm text-gray-500 mt-2">
-                        Supported formats: PDF, DOC, DOCX (Max size: 10MB)
-                      </p>
-                    </div>
+                  <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Label className="block mb-2">Upload File</Label>
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.ppt,.pptx"
+                      onChange={handleFileChange}
+                      required
+                      className="file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
+                    />
+                    <p className="left-0 mt-2 text-sm text-gray-500">
+                      Supported formats: PDF, DOC, DOCX (Max size: 10MB)
+                    </p>
                   </div>
 
-                  <Button 
+                  <Button
                     type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300 hover:scale-[1.02]"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    disabled={loading}
                   >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Note
+                    {loading ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                        Uploading...
+                      </span>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Note
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>
@@ -312,7 +409,7 @@ const AdminPanel = () => {
 
             <div className="grid gap-6">
               {uploadedNotes.map((note) => (
-                <Card key={note.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <Card key={note._id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-start space-x-4">
