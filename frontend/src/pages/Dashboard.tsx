@@ -86,9 +86,11 @@ const Dashboard = () => {
         {/* Course Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {courses.map((course) => {
-            const meta = courseMeta[course.name] || {};
-            const IconComponent = meta.icon || GraduationCap;
-            const color = meta.color || "from-gray-300 to-gray-500";
+const metaKey = Object.keys(courseMeta).find(key => course.name.startsWith(key));
+
+const meta = courseMeta[metaKey] || courseMeta.others; 
+const IconComponent = meta.icon || GraduationCap;
+const color = meta.color || "from-gray-500 to-slate-500";
 
             return (
               <Card

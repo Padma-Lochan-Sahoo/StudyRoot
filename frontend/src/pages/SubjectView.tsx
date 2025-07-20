@@ -166,6 +166,11 @@ const handleView = (note: any) => {
       toast.error("Download failed. The file may not be available.");
     }
   };
+  const isPreviewSupported = (format: string) => {
+  const lowerFormat = format.toLowerCase();
+  return lowerFormat === "pdf";
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
@@ -180,9 +185,10 @@ const handleView = (note: any) => {
           <ChevronRight className="h-4 w-4" />
           <Link to={`/dashboard/${course}`} className="hover:text-uninote-blue">{courseName}</Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to={`/dashboard/${course}/${semester}`} className="hover:text-uninote-blue">
-            Semester {semesterName}
-          </Link>
+          <Link to={`/dashboard/${course}/semester/${semester}`} className="hover:text-uninote-blue">
+  Semester {semesterName}
+</Link>
+
           <ChevronRight className="h-4 w-4" />
           <span className="font-medium text-gray-800">{subjectName}</span>
         </nav>
@@ -262,15 +268,26 @@ const handleView = (note: any) => {
 
                     <div className="flex flex-col items-end space-y-2">
                       <div className="flex space-x-2">
-                        <Button
-                          onClick={() => handleView(note)}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center space-x-1 border-uninote-blue text-uninote-blue hover:bg-uninote-blue hover:text-white"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span>View</span>
-                        </Button>
+                       <div className="relative group">
+  <Button
+    onClick={() => isPreviewSupported(note.fileFormat) && handleView(note)}
+    variant="outline"
+    size="sm"
+    disabled={!isPreviewSupported(note.fileFormat)}
+    className={`flex items-center space-x-1 border-uninote-blue text-uninote-blue 
+      ${isPreviewSupported(note.fileFormat) ? 'hover:bg-uninote-blue hover:text-white' : 'cursor-not-allowed opacity-50'}`}
+  >
+    <Eye className="h-4 w-4" />
+    <span>View</span>
+  </Button>
+
+  {!isPreviewSupported(note.fileFormat) && (
+    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-1 py-1 opacity-0 group-hover:opacity-40 transition-all duration-300 pointer-events-none">
+      Preview not supported for this file type
+    </div>
+  )}
+</div>
+
                         <Button
                           onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
                           size="sm"

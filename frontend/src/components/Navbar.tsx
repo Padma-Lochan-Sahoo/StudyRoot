@@ -20,8 +20,8 @@ const Navbar = ({ userName }: NavbarProps) => {
             </span>
           </Link>
           <UserDropdown userName={userName} />
-        </div>
       </div>
+    </div>
     </nav>
   );
 };
