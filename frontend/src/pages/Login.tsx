@@ -45,12 +45,56 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendTimer, setResendTimer] = useState(30);
 
   // Debug useEffect to monitor state changes
   useEffect(() => {
     console.log("State changed:", { forgotPasswordStep, resetPasswordStep, otpStep, isLogin });
   }, [forgotPasswordStep, resetPasswordStep, otpStep, isLogin]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendDisabled && resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    } else if (resendTimer === 0) {
+      setResendDisabled(false);
+      setResendTimer(30);
+    }
+    return () => clearTimeout(timer);
+  }, [resendDisabled, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (!signupEmail) {
+      toast.error("No email found for OTP resend");
+      return;
+    }
+    setResendDisabled(true);
+    try {
+      await axios.post("/auth/resend-otp", { email: signupEmail });
+      toast.success("OTP resent to your email");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to resend OTP");
+      setResendDisabled(false);
+      setResendTimer(30);
+    }
+  };
+
+  const handleResendPasswordResetOtp = async () => {
+    if (!forgotPasswordEmail) {
+      toast.error("No email found for OTP resend");
+      return;
+    }
+    setResendDisabled(true);
+    try {
+      await axios.post("/auth/resend-password-reset-otp", { email: forgotPasswordEmail });
+      toast.success("Password reset OTP resent to your email");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to resend password reset OTP");
+      setResendDisabled(false);
+      setResendTimer(30);
+    }
+  };
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -372,6 +416,33 @@ const Login = () => {
                     {isLogin ? "Sign Up" : "Sign In"}
                   </button>
                 </p>
+              </div>
+            )}
+
+            {currentStep === "signup-otp" && (
+              <div className="flex flex-col items-center space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResendOtp}
+                  disabled={resendDisabled}
+                  className="w-full"
+                >
+                  {resendDisabled ? `Resend OTP (${resendTimer}s)` : "Resend OTP"}
+                </Button>
+              </div>
+            )}
+            {currentStep === "forgot-password-otp" && (
+              <div className="flex flex-col items-center space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResendPasswordResetOtp}
+                  disabled={resendDisabled}
+                  className="w-full"
+                >
+                  {resendDisabled ? `Resend OTP (${resendTimer}s)` : "Resend OTP"}
+                </Button>
               </div>
             )}
           </CardContent>

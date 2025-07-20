@@ -322,3 +322,72 @@ export const resetPassword = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Resend OTP for signup
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+    // Find the previous Otp document to preserve fullName and password
+    const previousOtp = await Otp.findOne({ email });
+    // Remove previous OTPs
+    await Otp.deleteMany({ email });
+    // Generate and save new OTP
+    const otp = generateOTP();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOTP = await bcrypt.hash(otp, salt);
+    const otpDoc = new Otp({
+      email,
+      otp: hashedOTP,
+      fullName: previousOtp?.fullName,
+      password: previousOtp?.password,
+    });
+    await otpDoc.save();
+    await sendOtpEmail(email, otp);
+    return res.status(200).json({ message: "OTP resent successfully" });
+  } catch (err) {
+    console.error("resendOtp error:", err);
+    return res.status(500).json({ message: "Failed to resend OTP" });
+  }
+};
+
+// Resend OTP for password reset
+export const resendPasswordResetOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User with this email does not exist" });
+    }
+    // Find the previous PasswordResetOtp document to preserve verified status
+    const previousOtp = await PasswordResetOtp.findOne({ email });
+    // Remove previous OTPs
+    await PasswordResetOtp.deleteMany({ email });
+    // Generate and save new OTP
+    const otp = generateOTP();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOTP = await bcrypt.hash(otp, salt);
+    const otpDoc = new PasswordResetOtp({
+      email,
+      otp: hashedOTP,
+      verified: previousOtp?.verified || false,
+    });
+    await otpDoc.save();
+    await sendOtpEmail(email, otp);
+    return res.status(200).json({ message: "Password reset OTP resent successfully" });
+  } catch (err) {
+    console.error("resendPasswordResetOtp error:", err);
+    return res.status(500).json({ message: "Failed to resend password reset OTP" });
+  }
+};

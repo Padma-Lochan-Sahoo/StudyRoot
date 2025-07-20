@@ -78,7 +78,7 @@ interface UserProfile {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { authUser } = useAuthStore();
+  const { authUser, logout } = useAuthStore();
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -267,6 +267,7 @@ const Profile = () => {
         title: "Success",
         description: "Account deleted successfully",
       });
+      await logout();
       navigate("/auth");
     } catch (error: any) {
       toast({

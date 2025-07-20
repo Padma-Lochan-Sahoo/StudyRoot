@@ -62,14 +62,6 @@ const UserDropdown = ({ userName, userImage }: UserDropdownProps) => {
           <span>Profile</span>
         </DropdownMenuItem>
 
-        <DropdownMenuItem 
-          onClick={() => navigate("/profile")}
-          className="flex items-center space-x-2 hover:bg-gray-100/50"
-        >
-          <Settings className="h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
-
         {/* Conditionally show Admin option */}
         {authUser?.role === "admin" && (
           <DropdownMenuItem

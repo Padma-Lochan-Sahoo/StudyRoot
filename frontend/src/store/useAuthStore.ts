@@ -154,6 +154,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       await axios.post("/auth/logout");
       set({ authUser: null });
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authUser");
       toast.success("Logged out successfully");
       return true;
     } catch (error: any) {
