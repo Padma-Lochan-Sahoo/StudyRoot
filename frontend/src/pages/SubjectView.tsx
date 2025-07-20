@@ -1,13 +1,17 @@
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { GraduationCap, ChevronRight, Home, Download, FileText, Search, BookOpen, Eye, Calendar, User } from "lucide-react";
+import {
+  GraduationCap, ChevronRight, Home, Download,
+  FileText, Search, BookOpen, Eye, Calendar, User
+} from "lucide-react";
 import StarRating from "@/components/StarRating";
 import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/useAuthStore";
-import axios from "@/lib/axiosInstance"; // or just "axios" if not using custom instance
+import axios from "@/lib/axiosInstance";
 
 const SubjectView = () => {
   const { course, semester, subject } = useParams();
@@ -21,8 +25,28 @@ const SubjectView = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
 
-  // Fetch subject name
+  // 🛠 Fetch uploader names only once per user
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      const uniqueUserIds = new Set(notes.map(note => note.uploadedBy?._id).filter(Boolean));
+      for (const userId of uniqueUserIds) {
+        if (!userNames[userId]) {
+          try {
+            const res = await axios.get(`/notes/name/${userId}`);
+            setUserNames(prev => ({ ...prev, [userId]: res.data.fullName }));
+          } catch (error) {
+            console.error("Failed to fetch user name:", error);
+          }
+        }
+      }
+    };
+
+    if (notes.length > 0) fetchUserNames();
+  }, [notes]);
+
+  // 🧠 Fetch subject name
   useEffect(() => {
     const fetchSubjectName = async () => {
       try {
@@ -35,7 +59,7 @@ const SubjectView = () => {
     if (subject) fetchSubjectName();
   }, [subject]);
 
-  // Fetch course name
+  // 📘 Fetch course name
   useEffect(() => {
     const fetchCourseName = async () => {
       try {
@@ -48,7 +72,7 @@ const SubjectView = () => {
     if (course) fetchCourseName();
   }, [course]);
 
-  // FIXED: Watch semester, not course
+  // 📚 Fetch semester number
   useEffect(() => {
     const fetchSemesterName = async () => {
       try {
@@ -61,7 +85,7 @@ const SubjectView = () => {
     if (semester) fetchSemesterName();
   }, [semester]);
 
-  // Fetch notes
+  // 📄 Fetch all notes
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);
@@ -81,35 +105,60 @@ const SubjectView = () => {
 
   const getFileTypeColor = (format: string = "") => {
     switch (format.toUpperCase()) {
-      case "PDF":
-        return "border-l-red-500";
-      case "DOCX":
-        return "border-l-blue-500";
-      case "PPTX":
-        return "border-l-yellow-500";
-      default:
-        return "border-l-gray-500";
+      case "PDF": return "border-l-red-500";
+      case "DOCX": return "border-l-blue-500";
+      case "PPTX": return "border-l-yellow-500";
+      default: return "border-l-gray-500";
     }
   };
 
   const filteredNotes = notes.filter((note) =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleView = (noteId: string) => {
-    window.open(`/api/notes/view/${noteId}`, "_blank");
+const handleView = (note: any) => {
+    if (!note.fileUrl) {
+      toast.error("File URL not found. Cannot view note.");
+      console.error("Missing fileUrl for note:", note);
+      return;
+    }
+    const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(note.fileUrl)}&embedded=true`;
+    window.open(viewerUrl, "_blank");
+    axios.post(`/notes/view/${note._id}`)
+      .then(res => console.log(res.data.message))
+      .catch(err => {
+        console.error("Failed to update view count:", err);
+      });
   };
 
-  const handleDownload = (noteId: string) => {
-    window.open(`/api/notes/download/${noteId}`, "_blank");
+
+  const handleDownload = async (noteId: string, title: string, format: string) => {
+    toast.info("Preparing download...");
+    try {
+      const response = await axios.get(`/notes/download/${noteId}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${title}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Download started!");
+    } catch (err) {
+      console.error("Download failed:", err);
+      toast.error("Download failed. The file may not be available.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
-      {/* Navbar */}
       <Navbar userName={authUser?.fullName || "Guest"} />
 
-      {/* Breadcrumb */}
+      {/* Breadcrumbs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <nav className="flex items-center space-x-2 text-sm text-gray-600">
           <Link to="/dashboard" className="flex items-center hover:text-uninote-blue">
@@ -130,15 +179,14 @@ const SubjectView = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            {subjectName}{" "}
-            <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">Notes</span>
+            {subjectName} <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">Notes</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Download verified study materials and notes for {subjectName}.
           </p>
         </div>
 
-        {/* Search Bar */}
+        {/* Search */}
         <div className="max-w-md mx-auto mb-8">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -152,7 +200,7 @@ const SubjectView = () => {
           </div>
         </div>
 
-        {/* Loading/Error */}
+        {/* Loading & Error */}
         {loading && (
           <div className="text-center text-gray-500 py-10">Loading notes...</div>
         )}
@@ -160,7 +208,7 @@ const SubjectView = () => {
           <div className="text-center text-red-500 py-6">{error}</div>
         )}
 
-        {/* Notes List */}
+        {/* Notes */}
         {!loading && !error && filteredNotes.length > 0 ? (
           <div className="space-y-4">
             {filteredNotes.map((note) => (
@@ -184,7 +232,7 @@ const SubjectView = () => {
                           <span>{note.fileSize}</span>
                           <div className="flex items-center space-x-1">
                             <User className="h-3 w-3" />
-                            <span>{note.uploadedBy?.fullName || "Unknown"}</span>
+                            <span>{userNames[note.uploadedBy?._id] || "Unknown"}</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-3 w-3" />
@@ -202,7 +250,7 @@ const SubjectView = () => {
                     <div className="flex flex-col items-end space-y-2">
                       <div className="flex space-x-2">
                         <Button
-                          onClick={() => handleView(note._id)}
+                          onClick={() => handleView(note)}
                           variant="outline"
                           size="sm"
                           className="flex items-center space-x-1 border-uninote-blue text-uninote-blue hover:bg-uninote-blue hover:text-white"
@@ -211,17 +259,21 @@ const SubjectView = () => {
                           <span>View</span>
                         </Button>
                         <Button
-                          onClick={() => handleDownload(note._id)}
+                          onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
                           size="sm"
                           className="flex items-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue"
                         >
                           <Download className="h-4 w-4" />
                           <span>Download</span>
                         </Button>
+                        
+
                       </div>
-                      <div className="text-xs text-gray-500 font-medium">
-                        Downloads: {note.downloads.toLocaleString()}
-                      </div>
+                     <div className="flex items-center space-x-14 text-xs text-gray-500 font-medium">
+  <div>Views: {note.views?.toLocaleString() || 0}</div>
+  <div>Downloads: {note.downloads.toLocaleString()}</div>
+</div>
+
                     </div>
                   </div>
                 </CardContent>
