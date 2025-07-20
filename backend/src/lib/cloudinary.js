@@ -11,7 +11,7 @@ const connectCloudinary = async () => {
 };
 
 // Stream upload function
-export const streamUpload = (buffer) => {
+export const streamUpload = (buffer, originalFilename) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -19,6 +19,10 @@ export const streamUpload = (buffer) => {
         upload_preset: "studyroot_public",
         resource_type: "raw",
         access_mode: "public",
+        // THIS IS THE FIX 👇
+        filename_override: originalFilename,
+        use_filename: true,
+        unique_filename: false,
       },
       (error, result) => {
         if (result) resolve(result);

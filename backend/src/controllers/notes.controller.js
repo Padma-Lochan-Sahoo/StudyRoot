@@ -19,7 +19,10 @@ export const formatDate = (date) => {
 export const getNotesBySubject = async (req, res) => {
   const { subjectId } = req.params;
   try {
-    const notes = await Note.find({ subject: subjectId });
+    const notes = await Note.find({ subject: subjectId }).populate(
+      "uploadedBy",
+      "_id"
+    );
     res.status(200).json(notes);
   } catch (error) {
     res
@@ -78,7 +81,7 @@ export const uploadNote = async (req, res) => {
     }
 
     // Step 5: Upload to Cloudinary
-    const result = await streamUpload(req.file.buffer);
+    const result = await streamUpload(req.file.buffer, req.file.originalname);
 
     // Step 6: Extract file extension
     const originalName = req.file.originalname || "";
@@ -120,6 +123,9 @@ export const uploadNote = async (req, res) => {
 };
 
 //Download Note
+// /controllers/notes.controller.js
+// /controllers/notes.controller.js
+
 export const downloadNote = async (req, res) => {
   try {
     const noteId = req.params.id;
@@ -130,25 +136,26 @@ export const downloadNote = async (req, res) => {
         .json({ success: false, message: "Note not found" });
     }
 
-    // Increment download count
+    console.log("Attempting to download from URL:", note.fileUrl);
+
     note.downloads = (note.downloads || 0) + 1;
     await note.save();
 
-    // Fetch file from Cloudinary (or remote URL)
     const fileResponse = await axios.get(note.fileUrl, {
       responseType: "stream",
     });
+
+    // Set correct headers so browser understands it's a downloadable file
+    res.setHeader("Content-Type", fileResponse.headers["content-type"]);
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=\"${note.title}\"`
+      `attachment; filename="${note.title}.${note.fileFormat}"`
     );
-    res.setHeader(
-      "Content-Type",
-      fileResponse.headers["content-type"] || "application/octet-stream"
-    );
+
+    // Pipe stream directly to response
     fileResponse.data.pipe(res);
   } catch (error) {
-    console.error("Download Note Error:", error);
+    console.error("Download Note Error Details:", error.message);
     res.status(500).json({
       success: false,
       message: "Something went wrong during note download",
@@ -160,20 +167,29 @@ export const downloadNote = async (req, res) => {
 export const viewNote = async (req, res) => {
   try {
     const noteId = req.params.id;
-    const note = await Note.findById(noteId);
-    if (!note) {
+
+    // Use findOneAndUpdate with $inc for an atomic and efficient update.
+    const updatedNote = await Note.findByIdAndUpdate(
+      noteId,
+      { $inc: { views: 1 } },
+      { new: true } // This option returns the document after it has been updated.
+    );
+
+    if (!updatedNote) {
       return res
         .status(404)
         .json({ success: false, message: "Note not found" });
     }
 
-    res.redirect(note.fileUrl); // Redirects browser to open PDF in new tab
+    // The view has been successfully counted.
+    res.status(200).json({ success: true, message: "View count incremented." });
   } catch (error) {
-    console.error("View Note Error:", error);
-    res.status(500).json({ success: false, message: "Error opening note" });
+    console.error("View Note Error (incrementing count):", error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update view count" });
   }
 };
-
 export const getNameByUserId = async (req, res) => {
   try {
     const userId = req.params.id;
