@@ -1,13 +1,22 @@
+// AdminPanel.tsx
 
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GraduationCap, Upload, FileText, Edit, Trash2, Plus, LogOut, Users, BookOpen, Settings } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  GraduationCap, Upload, FileText, Edit, Trash2, Plus, LogOut, Users, BookOpen, Settings
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -16,64 +25,45 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("upload");
+  const [loading, setLoading] = useState(false);
 
-const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [uploadedNotes, setUploadedNotes] = useState<any[]>([]);
 
-const [isSemesterDisabled, setIsSemesterDisabled] = useState(true);
-const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
 
+  const [isSemesterDisabled, setIsSemesterDisabled] = useState(true);
+  const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
 
   const [formData, setFormData] = useState({
     course: "",
     semester: "",
     subject: "",
     title: "",
-    file: null as File | null
+    file: null as File | null,
   });
 
-
   const handleLogout = async () => {
-  try {
-    await logout();
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("authUser");
-    navigate("/"); // send user back to login
-  } catch (err: any) {
-    console.error("Logout Error ❌", err.response?.data?.message || err.message);
-    alert("Something went wrong while logging out.");
-  }
-};
-
-const handleInputChange = (field: string, value: string) => {
-  setFormData(prev => ({
-    ...prev,
-    [field]: value
-  }));
-};
-  const uploadedNotes = [
-    {
-      id: 1,
-      title: "Introduction to Data Structures",
-      course: "B.Tech",
-      semester: "3",
-      subject: "DSA",
-      uploadDate: "2024-01-15",
-      downloads: 1250
-    },
-    {
-      id: 2,
-      title: "Database Management Systems",
-      course: "B.Tech",
-      semester: "4",
-      subject: "DBMS",
-      uploadDate: "2024-01-10",
-      downloads: 980
+    try {
+      await logout();
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authUser");
+      navigate("/");
+    } catch (err: any) {
+      console.error("Logout Error ❌", err.response?.data?.message || err.message);
+      alert("Something went wrong while logging out.");
     }
-  ];
+  };
 
-   const handleCourseChange = async (courseId: string) => {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleCourseChange = async (courseId: string) => {
     handleInputChange("course", courseId);
     handleInputChange("semester", "");
     handleInputChange("subject", "");
@@ -87,6 +77,7 @@ const handleInputChange = (field: string, value: string) => {
       console.error("Failed to fetch semesters", err);
     }
   };
+
   const handleSemesterChange = async (semesterId: string) => {
     handleInputChange("semester", semesterId);
     handleInputChange("subject", "");
@@ -102,9 +93,9 @@ const handleInputChange = (field: string, value: string) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      file
+      file,
     }));
   };
 
@@ -112,10 +103,15 @@ const handleInputChange = (field: string, value: string) => {
     e.preventDefault();
     const { course, semester, subject, title, file } = formData;
     if (!course || !semester || !subject || !title || !file) {
-      return toast({ title: "Error", description: "Fill in all fields", variant: "destructive" });
+      return toast({
+        title: "Error",
+        description: "Fill in all fields",
+        variant: "destructive",
+      });
     }
 
     try {
+      setLoading(true);
       const data = new FormData();
       data.append("course", course);
       data.append("semester", semester);
@@ -146,6 +142,8 @@ const handleInputChange = (field: string, value: string) => {
         description: err.response?.data?.message || "Something went wrong",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,12 +153,11 @@ const handleInputChange = (field: string, value: string) => {
       description: `"${title}" has been deleted.`,
     });
   };
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get("/courses");
-        console.log("Fetched courses:", res.data);
-        
         setCourses(res.data || []);
       } catch (err) {
         console.error("Failed to load courses", err);
@@ -168,6 +165,22 @@ const handleInputChange = (field: string, value: string) => {
     };
     fetchCourses();
   }, []);
+
+  useEffect(() => {
+  if (activeTab === "manage") {
+    const fetchNotes = async () => {
+      try {
+        const res = await axios.get("/notes");
+        setUploadedNotes(res.data || []);
+      } catch (err) {
+        console.error("Error fetching notes", err);
+      }
+    };
+    fetchNotes();
+  }
+}, [activeTab]);
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50 flex">
       {/* Sidebar */}
@@ -183,32 +196,28 @@ const handleInputChange = (field: string, value: string) => {
           </div>
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-yellow-800 font-medium">
-              🔒 Admin Panel
-            </p>
-            <p className="text-xs text-yellow-700 mt-1">
-              Administrative access only
-            </p>
+            <p className="text-sm text-yellow-800 font-medium">🔒 Admin Panel</p>
+            <p className="text-xs text-yellow-700 mt-1">Administrative access only</p>
           </div>
 
           <nav className="space-y-2">
             <button
               onClick={() => setActiveTab("upload")}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                activeTab === "upload" 
-                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white" 
+                activeTab === "upload"
+                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               <Upload className="h-5 w-5" />
               <span>Upload Notes</span>
             </button>
-            
+
             <button
               onClick={() => setActiveTab("manage")}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                activeTab === "manage" 
-                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white" 
+                activeTab === "manage"
+                  ? "bg-gradient-to-r from-uninote-blue to-uninote-purple text-white"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
             >
@@ -227,8 +236,8 @@ const handleInputChange = (field: string, value: string) => {
         </div>
 
         <div className="absolute bottom-6 left-6 right-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleLogout}
             className="w-full flex items-center space-x-2 border-red-200 text-red-600 hover:bg-red-50"
           >
@@ -239,17 +248,25 @@ const handleInputChange = (field: string, value: string) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 flex justify-center items-start p-10">
         {activeTab === "upload" && (
-          <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Upload Notes</h1>
+          <div className="w-full max-w-2xl">
+            <h1 className="text-3xl font-bold text-gray-800 mb-1">
+              Upload <span className="text-uninote-purple">Notes</span>
+            </h1>
+            <p className="text-gray-500 mb-6">
+              Upload verified study materials for students to access.
+            </p>
 
-            <Card className="bg-white/80 border-0 shadow-xl">
+            <Card className="bg-white shadow-lg rounded-xl border border-gray-100">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800">
                   <Plus className="h-5 w-5" />
                   <span>Add New Note</span>
                 </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Fill in the details below to upload a new study material.
+                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -316,28 +333,124 @@ const handleInputChange = (field: string, value: string) => {
                       type="text"
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
-                      placeholder="Enter title"
+                      placeholder="Enter descriptive title for the note"
                       required
                     />
                   </div>
 
-                  <div>
-                    <Label>Upload File</Label>
+                  <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Label className="block mb-2">Upload File</Label>
                     <Input
                       type="file"
                       accept=".pdf,.doc,.docx,.ppt,.pptx"
                       onChange={handleFileChange}
                       required
+                      className="file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
                     />
+                    <p className="left-0 mt-2 text-sm text-gray-500">
+                      Supported formats: PDF, DOC, DOCX (Max size: 10MB)
+                    </p>
                   </div>
 
-                  <Button type="submit" className="w-full">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Note
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                        Uploading...
+                      </span>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Note
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === "manage" && (
+          <div>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                Manage{" "}
+                <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
+                  Notes
+                </span>
+              </h1>
+              <p className="text-gray-600">
+                View and manage all uploaded study materials.
+              </p>
+            </div>
+
+            <div className="grid gap-6">
+              {uploadedNotes.map((note) => (
+                <Card key={note._id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start space-x-4">
+                        <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl">
+                          <FileText className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-800 mb-1">{note.title}</h3>
+                          <p className="text-gray-600 mb-2">
+                            {note.course} • Semester {note.semester} • {note.subject}
+                          </p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <span>Uploaded: {note.uploadDate}</span>
+                            <span>Downloads: {note.downloads}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(note.id, note.title)}
+                          className="border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -21,8 +21,8 @@ export const streamUpload = (buffer, originalFilename) => {
         access_mode: "public",
         // THIS IS THE FIX 👇
         filename_override: originalFilename,
-        use_filename: true,
-        unique_filename: false,
+        use_filename: false,
+        unique_filename: true,
       },
       (error, result) => {
         if (result) resolve(result);

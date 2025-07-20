@@ -6,6 +6,10 @@ import {
   viewNote,
   getNameByUserId,
   getNotesBySubject,
+  getAllNotes,
+  updateNote,
+  deleteNote,
+  
 } from "../controllers/notes.controller.js";
 import { isAdmin, protectRoute } from "../middleware/auth.moddleware.js";
 // import { createNote, getAllNotes, getNoteById, updateNote, deleteNote } from '../controllers/note.controller.js';
@@ -19,15 +23,14 @@ router.post(
   upload.single("file"),
   uploadNote
 );
-router.get("/download/:id", downloadNote);
-router.get("/view/:id", viewNote);
-router.get("/subject/:subjectId", getNotesBySubject);
-router.get("/name/:id", getNameByUserId);
+router.get('/', protectRoute, getAllNotes);
+router.get("/download/:id", protectRoute, downloadNote);
+router.get("/view/:id", protectRoute, viewNote);
+router.get("/subject/:subjectId", protectRoute, getNotesBySubject);
+router.get("/name/:id", protectRoute, getNameByUserId);
+router.put('/update/:id', protectRoute,isAdmin, upload.single('file'), updateNote);
+router.delete('/:id', protectRoute, isAdmin, deleteNote);
 
-// router.post('/', createNote);
-// router.get('/', getAllNotes);
 // router.get('/:id', getNoteById);
-// router.put('/:id', updateNote);
-// router.delete('/:id', deleteNote);
 
 export default router;
