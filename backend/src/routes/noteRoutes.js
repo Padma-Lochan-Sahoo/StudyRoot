@@ -12,7 +12,6 @@ router.get('/download/:id', downloadNote);
 router.get("/view/:id", viewNote);
 router.get('/name/:id', getNameByUserId);
 
-
 // router.post('/', createNote);
 // router.get('/', getAllNotes);
 // router.get('/:id', getNoteById);

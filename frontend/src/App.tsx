@@ -11,6 +11,7 @@ import SubjectView from "./pages/SubjectView";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import CollaborativeNoteEditor from "./pages/CollaborativeNoteEditor";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
@@ -141,6 +142,15 @@ const ADMIN_ONLY = ["admin"];
     element={
       <ProtectedRoute allowedRoles={ADMIN_ONLY}>
         <AdminPanel />
+      </ProtectedRoute>
+    }
+  />
+
+  <Route
+    path="/collab-note/:sessionId"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <CollaborativeNoteEditor />
       </ProtectedRoute>
     }
   />

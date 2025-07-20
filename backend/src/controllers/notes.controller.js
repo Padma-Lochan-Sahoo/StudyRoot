@@ -4,8 +4,11 @@ import Course from "../models/Course.js";
 import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import Note from "../models/Note.js";
+import CollabNoteSession from "../models/CollabNoteSession.js";
 import { streamUpload } from "../lib/cloudinary.js";
 import path from 'path';
+import { sendOtpEmail } from "../lib/utils.js"; // Use as base for sending invites
+import crypto from "crypto";
 
 // format date
 export const formatDate = (date) => {

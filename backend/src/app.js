@@ -27,6 +27,7 @@ import semesterRoute from "./routes/semesterRoutes.js";
 import subjectRoute from "./routes/subjectRoutes.js";
 import noteRoute from "./routes/noteRoutes.js";
 import profileRoute from "./routes/profileRoutes.js";
+import collabNoteRoutes from "./routes/collabNoteRoutes.js";
 
 // routes declaration
 app.use("/api/auth", authRoute);
@@ -36,5 +37,6 @@ app.use("/api/subjects", subjectRoute);
 // app.use("/api/notes", noteRoute);
 app.use("/api/notes", noteRoute);
 app.use("/api/profile", profileRoute);
+app.use("/api/collab-notes", collabNoteRoutes);
 
 export { app }
