@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 import Course from "../models/Course.js";
 import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
-import stream from "stream";
 import Note from "../models/Note.js";
 import { streamUpload } from "../lib/cloudinary.js";
 import path from "path";
@@ -236,12 +235,10 @@ export const uploadNote = async (req, res) => {
     // Step 2: Find Semester by ID (sent from frontend)
     const foundSemester = await Semester.findById(semester);
     if (!foundSemester || String(foundSemester.course) !== String(course)) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Semester not found or mismatched with course",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Semester not found or mismatched with course",
+      });
     }
 
     // Step 3: Get or create Subject (by name under selected semester)
@@ -310,12 +307,10 @@ export const uploadNote = async (req, res) => {
     res.status(201).json({ success: true, note });
   } catch (error) {
     console.error("Upload Note Error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong during note upload",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong during note upload",
+    });
   }
 };
 export const downloadNote = async (req, res) => {
