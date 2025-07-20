@@ -9,6 +9,35 @@ interface AuthUser {
   email: string;
   role: string;
   profilePic?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  bio?: string;
+  location?: string;
+  currentCourse?: string;
+  currentSemester?: number;
+  university?: string;
+  studentId?: string;
+  branch?: string;
+  academicYear?: string;
+  preferences?: {
+    notifications: {
+      email: boolean;
+      downloads: boolean;
+      courseUpdates: boolean;
+    };
+    theme: string;
+    language: string;
+    defaultCourse?: string;
+  };
+  activity?: {
+    lastLogin: string;
+    totalDownloads: number;
+    favoriteNotes: any[];
+    downloadHistory: any[];
+  };
+  profileCompletion: number;
+  createdAt: string;
 }
 
 interface SignupData {

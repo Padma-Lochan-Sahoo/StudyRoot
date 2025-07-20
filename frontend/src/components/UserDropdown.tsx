@@ -54,12 +54,18 @@ const UserDropdown = ({ userName, userImage }: UserDropdownProps) => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-lg border-white/20">
-        <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100/50">
+        <DropdownMenuItem 
+          onClick={() => navigate("/profile")}
+          className="flex items-center space-x-2 hover:bg-gray-100/50"
+        >
           <User className="h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
 
-        <DropdownMenuItem className="flex items-center space-x-2 hover:bg-gray-100/50">
+        <DropdownMenuItem 
+          onClick={() => navigate("/profile")}
+          className="flex items-center space-x-2 hover:bg-gray-100/50"
+        >
           <Settings className="h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>

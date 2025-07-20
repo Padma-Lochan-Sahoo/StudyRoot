@@ -4,6 +4,7 @@ const courseSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
     enum: ['B.Tech', 'MCA','BCA','BBA','MBA','B.Com','M.Com','B.Sc','M.Sc','B.A','M.A','others']
   },
   totalSemesters: {

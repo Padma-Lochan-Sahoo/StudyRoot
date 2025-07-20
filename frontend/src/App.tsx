@@ -9,6 +9,7 @@ import CourseView from "./pages/CourseView";
 import SemesterView from "./pages/SemesterView";
 import SubjectView from "./pages/SubjectView";
 import AdminPanel from "./pages/AdminPanel";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -118,6 +119,16 @@ const ADMIN_ONLY = ["admin"];
     element={
       <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
         <SubjectView />
+      </ProtectedRoute>
+    }
+  />
+
+  {/* Profile route for all authenticated users */}
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+        <Profile />
       </ProtectedRoute>
     }
   />
