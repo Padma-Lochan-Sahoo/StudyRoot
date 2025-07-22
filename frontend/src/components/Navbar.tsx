@@ -1,12 +1,14 @@
+// Navbar.tsx
 import { Link } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore"; // import the auth store
 import UserDropdown from "@/components/UserDropdown";
 
-interface NavbarProps {
-  userName: string;
-}
+const Navbar = () => {
+  const { authUser } = useAuthStore(); // get auth user from store
 
-const Navbar = ({ userName }: NavbarProps) => {
+  if (!authUser) return null; // optionally avoid rendering navbar if not logged in
+
   return (
     <nav className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,9 +21,13 @@ const Navbar = ({ userName }: NavbarProps) => {
               StudyRoot
             </span>
           </Link>
-          <UserDropdown userName={userName} />
+          {/* Pass fullName and profilePic to dropdown */}
+          <UserDropdown 
+            userName={authUser.fullName} 
+            userImage={authUser.profilePic} 
+          />
+        </div>
       </div>
-    </div>
     </nav>
   );
 };

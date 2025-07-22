@@ -10,8 +10,21 @@ import path from "path";
 export const getAllNotes = async (req, res) => {
   try {
     const notes = await Note.find()
-      .populate("subject", "name")
-      .populate("uploadedBy", "fullName");
+      .populate({
+        path: "subject",
+        select: "name semester",
+        populate: {
+          path: "semester",
+          select: "number course",
+          populate: {
+            path: "course",
+            select: "name",
+          },
+        },
+      })
+      .populate("uploadedBy", "fullName")
+      .populate("fileFormat", "format");
+
     res.status(200).json(notes);
   } catch (error) {
     console.error("Error fetching all notes:", error);
@@ -67,7 +80,9 @@ export const updateNote = async (req, res) => {
       else if (["ppt", "pptx"].includes(ext)) fileFormat = "pptx";
       else if (["xls", "xlsx"].includes(ext)) fileFormat = "xlsx";
 
-      if (!["pdf", "docx", "txt", "pptx", "xlsx"].includes(fileFormat)) {
+      // ✅ Only allow known valid formats
+      const validFormats = ["pdf", "docx", "txt", "pptx", "xlsx"];
+      if (!validFormats.includes(fileFormat)) {
         return res.status(400).json({ message: "Unsupported file format" });
       }
 
