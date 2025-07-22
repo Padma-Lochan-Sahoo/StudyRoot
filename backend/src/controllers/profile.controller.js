@@ -358,6 +358,39 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+
+const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find().sort({ fullName: 1 }).select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users', error });
+  }
+}
+
+const makeAdmin = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    user.role = "admin";
+    await user.save();
+    return res.status(200).json({
+      user,
+      message: "User role updated to admin successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error updating user role: " + error.message,
+    });
+  }
+}
+
 export {
   getUserProfile,
   updateProfile,
@@ -366,4 +399,6 @@ export {
   changePassword,
   getUserStats,
   deleteAccount,
+  makeAdmin,
+  getAllUser
 }; 
