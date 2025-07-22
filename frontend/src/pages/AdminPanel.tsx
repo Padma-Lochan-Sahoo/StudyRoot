@@ -6,6 +6,16 @@ import SidebarNav from "@/components/admin/SidebarNav";
 import UploadForm from "@/components/admin/UploadForm";
 import ManageNotesSection from "@/components/admin/ManageNotesSection";
 import EditNoteModal from "@/components/admin/EditNoteModel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import axios from "@/lib/axiosInstance";
 
 const AdminPanel = () => {
@@ -17,6 +27,11 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [noteBeingEdited, setNoteBeingEdited] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Delete confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<{id: string, title: string} | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [courses, setCourses] = useState<any[]>([]);
   const [uploadedNotes, setUploadedNotes] = useState<any[]>([]);
@@ -135,18 +150,41 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
+  // Handle delete confirmation
+  const handleDeleteClick = (id: string, title: string) => {
+    setNoteToDelete({ id, title });
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Actual delete function
+  const handleConfirmDelete = async () => {
+    if (!noteToDelete) return;
+    
     try {
-      await axios.delete(`/notes/${id}`);
-      setUploadedNotes((prev) => prev.filter((note) => note._id !== id));
-      toast({ title: "Deleted", description: `"${title}" has been deleted.` });
+      setIsDeleting(true);
+      await axios.delete(`/notes/${noteToDelete.id}`);
+      setUploadedNotes((prev) => prev.filter((note) => note._id !== noteToDelete.id));
+      toast({ 
+        title: "Deleted", 
+        description: `"${noteToDelete.title}" has been deleted successfully.` 
+      });
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to delete note",
+        description: "Failed to delete note. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setNoteToDelete(null);
     }
+  };
+
+  // Cancel delete
+  const handleCancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setNoteToDelete(null);
   };
 
   useEffect(() => {
@@ -204,7 +242,7 @@ const AdminPanel = () => {
               setNoteBeingEdited(note);
               setIsEditModalOpen(true);
             }}
-            onDelete={handleDelete}
+            onDelete={handleDeleteClick}
           />
         )}
 
@@ -222,6 +260,33 @@ const AdminPanel = () => {
             }}
           />
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-red-600">Delete Note</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-600">
+                Are you sure you want to delete "{noteToDelete?.title}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                onClick={handleCancelDelete}
+                className="border-gray-300 text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

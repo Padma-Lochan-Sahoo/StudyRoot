@@ -24,7 +24,8 @@ export const getAllNotes = async (req, res) => {
           }
         }
       })
-      .populate("uploadedBy", "fullName");
+      .populate("uploadedBy", "fullName")
+      .populate("fileFormat", "format");
 
     res.status(200).json(notes);
   } catch (error) {
