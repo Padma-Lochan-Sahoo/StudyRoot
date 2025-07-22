@@ -18,135 +18,77 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
     return <FileText className={iconClass} />;
   };
 
-  // const formatDate = (dateString: string) => {
-  //   try {
-  //     const date = new Date(dateString);
-  //     return date.toLocaleDateString('en-US', { 
-  //       year: 'numeric', 
-  //       month: 'short', 
-  //       day: 'numeric' 
-  //     });
-  //   } catch {
-  //     return dateString;
-  //   }
-  // };
-
   return (
     <Card className={`bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 ${getFileTypeColor(note.fileFormat)} group`}>
       <CardContent className="p-4 sm:p-6">
-        {/* Mobile Layout */}
-        <div className="block sm:hidden space-y-4">
-          {/* Header with icon and title */}
-          <div className="flex items-start space-x-3">
-            <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-lg shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          {/* Main content area */}
+          <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+            <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 sm:p-3 rounded-lg sm:rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-200">
               {getFileTypeIcon(note.fileFormat)}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-gray-800 mb-1 line-clamp-2">{note.title}</h3>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+              {/* Title and format badge */}
+              <div className="flex items-start justify-between mb-1 sm:mb-2">
+                <h3 className="text-base sm:text-lg font-bold text-gray-800 line-clamp-2 sm:line-clamp-1 pr-2 sm:pr-4 flex-1">{note.title}</h3>
+                <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-full shrink-0 ml-2">
+                  {note.fileFormat?.toUpperCase() || 'FILE'}
+                </span>
+              </div>
+              
+              {/* Course info */}
+              <p className="text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-1">
                 {note.subject?.semester?.course?.name}
+                <span className="hidden sm:inline"> • Semester {note.subject?.semester?.number} • {note.subject?.name}</span>
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 mb-2 sm:hidden">
                 Semester {note.subject?.semester?.number} • {note.subject?.name}
               </p>
-            </div>
-          </div>
-          
-          {/* Metadata */}
-          <div className="space-y-2 text-xs text-gray-500">
-            <div className="flex items-center space-x-1">
-              <User className="h-3 w-3" />
-              <span>{note.uploadedBy?.fullName || "Unknown"}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-1">
-                <Calendar className="h-3 w-3" />
-                <span>{note.uploadDate}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Download className="h-3 w-3" />
-                <span>{note.downloads} downloads</span>
+              
+              {/* Metadata */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-2 text-xs sm:text-sm text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="truncate">
+                    <span className="sm:hidden">{note.uploadedBy?.fullName || "Unknown"}</span>
+                    <span className="hidden sm:inline">By: {note.uploadedBy?.fullName || "Unknown"}</span>
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>
+                    <span className="sm:hidden">{note.uploadDate}</span>
+                    <span className="hidden sm:inline">On: {note.uploadDate}</span>
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>{note.downloads} downloads</span>
+                </div>
               </div>
             </div>
           </div>
           
           {/* Action buttons */}
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 sm:shrink-0 sm:ml-4">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 text-xs"
+              className="flex-1 sm:flex-initial border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 text-xs sm:text-sm"
               onClick={() => onEdit(note)}
             >
-              <Edit className="h-3 w-3 mr-1" />
+              <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Edit
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => onDelete(note._id, note.title)}
-              className="flex-1 border-red-200 text-red-600 hover:bg-red-50 text-xs"
+              className="flex-1 sm:flex-initial border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors duration-200 text-xs sm:text-sm"
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Delete
             </Button>
-          </div>
-        </div>
-
-        {/* Desktop Layout */}
-        <div className="hidden sm:block">
-          <div className="flex items-center justify-between">
-            <div className="flex items-start space-x-4 flex-1 min-w-0">
-              <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-200">
-                {getFileTypeIcon(note.fileFormat)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-bold text-gray-800 line-clamp-1 pr-4">{note.title}</h3>
-                  <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-full shrink-0 ml-2">
-                    {note.fileFormat?.toUpperCase() || 'FILE'}
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-3 line-clamp-1">
-                  {note.subject?.semester?.course?.name} • Semester {note.subject?.semester?.number} • {note.subject?.name}
-                </p>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 text-sm text-gray-500">
-                  <div className="flex items-center space-x-1">
-                    <User className="h-4 w-4" />
-                    <span className="truncate">By: {note.uploadedBy?.fullName || "Unknown"}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>On: {note.uploadDate}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Download className="h-4 w-4" />
-                    <span>{note.downloads} downloads</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2 shrink-0 ml-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
-                onClick={() => onEdit(note)}
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(note._id, note.title)}
-                className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors duration-200"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </div>
           </div>
         </div>
       </CardContent>
