@@ -94,8 +94,20 @@ export const updateNote = async (req, res) => {
     }
 
     await note.save();
+    // ✅ Populate subject -> semester -> course and uploadedBy
+    const populatedNote = await Note.findById(note._id)
+      .populate({
+        path: "subject",
+        populate: {
+          path: "semester",
+          populate: {
+            path: "course",
+          },
+        },
+      })
+      .populate("uploadedBy");
 
-    return res.status(200).json({ success: true, note });
+    return res.status(200).json({ success: true, note: populatedNote });
   } catch (error) {
     console.error("Error updating note:", error);
     res.status(500).json({ message: "Error updating note", error });
