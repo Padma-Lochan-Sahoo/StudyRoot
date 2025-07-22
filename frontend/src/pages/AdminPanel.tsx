@@ -50,17 +50,7 @@ const AdminPanel = () => {
   const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
 
   // Logout handler
-  const handleLogout = async () => {
-    try {
-      await logout();
-      localStorage.removeItem("isAuthenticated");
-      localStorage.removeItem("authUser");
-      navigate("/");
-    } catch (err: any) {
-      console.error("Logout Error ❌", err.response?.data?.message || err.message);
-      alert("Something went wrong while logging out.");
-    }
-  };
+ 
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
