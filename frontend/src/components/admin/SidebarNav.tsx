@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  UserCog,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -94,6 +95,12 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
       onClick: () => handleTabChange("manage"),
     },
     {
+      id: "users",
+      label: "Manage Users",
+      icon: UserCog,
+      onClick: () => handleTabChange("users"),
+    },
+    {
       id: "dashboard",
       label: "Dashboard",
       icon: Users,
@@ -103,18 +110,25 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Menu Button - Always visible on mobile, toggles sidebar */}
       <button
         id="menu-button"
-        onClick={() => setIsMobileOpen(true)}
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl p-3 shadow-lg hover:shadow-xl transition-all duration-200"
       >
-        <Menu className="h-5 w-5 text-gray-700" />
+        {isMobileOpen ? (
+          <X className="h-5 w-5 text-gray-700" />
+        ) : (
+          <Menu className="h-5 w-5 text-gray-700" />
+        )}
       </button>
 
-      {/* Mobile Overlay */}
+      {/* Overlay for mobile */}
       {isMobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200" />
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200"
+          onClick={() => setIsMobileOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
@@ -138,21 +152,13 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
                 {!isCollapsed && (
-                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                  <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                     UniNote
                   </span>
                 )}
               </div>
               
-              {/* Mobile Close Button */}
-              <button
-                onClick={() => setIsMobileOpen(false)}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
-              
-              {/* Desktop Collapse Button */}
+              {/* Collapse Button - Desktop only */}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -163,7 +169,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
 
             {/* Admin Badge */}
             {!isCollapsed && (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200/50 rounded-xl p-4 mt-6 shadow-sm">
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200/50 rounded-xl p-3 sm:p-4 mt-4 sm:mt-6 shadow-sm">
                 <p className="text-sm text-yellow-800 font-semibold flex items-center">
                   🔒 Admin Panel
                 </p>
@@ -173,9 +179,9 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-3 sm:p-4 space-y-1 sm:space-y-2">
             {navigationItems.map((item) => {
-              const isActive = activeTab === item.id || (item.id === "dashboard" && false); // Dashboard doesn't have active state
+              const isActive = activeTab === item.id;
               const Icon = item.icon;
               
               return (
@@ -183,7 +189,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                   key={item.id}
                   onClick={item.onClick}
                   className={`
-                    group relative w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl 
+                    group relative w-full flex items-center space-x-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl 
                     transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
                     ${isActive
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/25"
@@ -198,7 +204,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                   )}
                   
                   {/* Active Indicator */}
-                  {isActive && (
+                  {isActive && !isCollapsed && (
                     <div className="absolute right-3 w-2 h-2 bg-white rounded-full opacity-80" />
                   )}
                   
@@ -215,14 +221,14 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
           </nav>
 
           {/* Logout Button */}
-          <div className="p-4 border-t border-gray-100/50">
+          <div className="p-3 sm:p-4 border-t border-gray-100/50">
             <Button
               variant="outline"
               onClick={handleLogout}
               className={`
                 w-full group border-red-200/50 text-red-600 hover:bg-red-50/80 hover:border-red-300 
-                transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
-                ${isCollapsed ? "px-0" : "px-4"}
+                transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] h-12 sm:h-auto
+                ${isCollapsed ? "px-0" : "px-3 sm:px-4"}
               `}
             >
               <LogOut className="h-4 w-4" />

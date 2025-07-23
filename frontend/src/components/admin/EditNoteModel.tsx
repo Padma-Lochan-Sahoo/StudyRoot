@@ -49,6 +49,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
       });
 
       onUpdate(res.data.note);
+      
       toast({ 
         title: "Success", 
         description: "Note updated successfully",

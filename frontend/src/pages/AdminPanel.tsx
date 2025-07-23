@@ -6,6 +6,8 @@ import SidebarNav from "@/components/admin/SidebarNav";
 import UploadForm from "@/components/admin/UploadForm";
 import ManageNotesSection from "@/components/admin/ManageNotesSection";
 import EditNoteModal from "@/components/admin/EditNoteModel";
+import ManageUsersSection from "@/components/admin/ManageUsersSection"; // you'll create this next
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +21,6 @@ import {
 import axios from "@/lib/axiosInstance";
 
 const AdminPanel = () => {
-  const { logout } = useAuthStore();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState("upload");
@@ -250,6 +250,11 @@ const AdminPanel = () => {
             }}
           />
         )}
+
+        {activeTab === "users" && (
+  <ManageUsersSection />
+)}
+
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
