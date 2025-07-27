@@ -32,7 +32,6 @@ app.use("/api/auth", authRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/semesters", semesterRoute);
 app.use("/api/subjects", subjectRoute);
-// app.use("/api/notes", noteRoute);
 app.use("/api/notes", noteRoute);
 app.use("/api/profile", profileRoute);
 

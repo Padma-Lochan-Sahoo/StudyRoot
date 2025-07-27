@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthStore } from "@/store/useAuthStore";
 import SidebarNav from "@/components/admin/SidebarNav";
 import UploadForm from "@/components/admin/UploadForm";
 import ManageNotesSection from "@/components/admin/ManageNotesSection";
 import EditNoteModal from "@/components/admin/EditNoteModel";
-import ManageUsersSection from "@/components/admin/ManageUsersSection"; // you'll create this next
+import ManageUsersSection from "@/components/admin/ManageUsersSection";
+import CreateCourseSection from "@/components/admin/CreateCourseSection";
+import CreateSubjectForm from "@/components/admin/CreateSubjectForm";
+
+
 
 import {
   AlertDialog,
@@ -48,6 +50,83 @@ const AdminPanel = () => {
 
   const [isSemesterDisabled, setIsSemesterDisabled] = useState(true);
   const [isSubjectDisabled, setIsSubjectDisabled] = useState(true);
+
+
+  const [subjectFormData, setSubjectFormData] = useState({
+  course: "",
+  semester: "",
+  semesterNumber: '',
+  subjectName: "",
+  subjectCode: "", 
+});
+const [subjectSemesterOptions, setSubjectSemesterOptions] = useState<any[]>([]);
+const [isSubjectSemesterDisabled, setIsSubjectSemesterDisabled] = useState(true);
+const handleSubjectFormChange = (field: string, value: string) => {
+  setSubjectFormData((prev) => ({ ...prev, [field]: value }));
+};
+
+const handleSubjectCourseChange = async (courseId: string) => {
+  handleSubjectFormChange("course", courseId);
+  handleSubjectFormChange("semester", "");
+  setIsSubjectSemesterDisabled(true);
+
+  try {
+    const res = await axios.get(`/semesters/course/${courseId}`);
+    setSubjectSemesterOptions(res.data || []);
+    setIsSubjectSemesterDisabled(false);
+  } catch (err) {
+    console.error("Failed to fetch semesters for subject form", err);
+  }
+};
+
+const handleSubjectSemesterChange = (semesterId: string) => {
+  const selected = subjectSemesterOptions.find(s => s._id === semesterId);
+  handleSubjectFormChange("semester", semesterId);
+  handleSubjectFormChange("semesterNumber", selected?.number?.toString() || "");
+};
+
+
+const handleSubjectFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const { course, semester, semesterNumber, subjectName, subjectCode } = subjectFormData;
+
+  if (!course || !semester || !subjectName || !subjectCode) {
+    return toast({
+      title: "Error",
+      description: "Fill in all fields",
+      variant: "destructive",
+    });
+  }
+console.log("Submitting subject with semester ID:", semester);
+
+  try {
+    setLoading(true);
+    await axios.post("/subjects", {
+  course,
+  semester,
+  semesterNumber,
+  name: subjectName,
+  subjectCode,
+});
+
+
+    toast({ title: "Success", description: "Subject created successfully!" });
+
+    // ✅ Reset form
+    setSubjectFormData({ course: "", semester: "",semesterNumber: "", subjectName: "", subjectCode: "" });
+    setSubjectSemesterOptions([]);
+    setIsSubjectSemesterDisabled(true);
+  } catch (err: any) {
+    toast({
+      title: "Creation Error",
+      description: err.response?.data?.message || "Something went wrong",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Logout handler
  
@@ -208,6 +287,23 @@ const AdminPanel = () => {
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex justify-center items-start p-10">
+
+        {activeTab === "createCourse" && <CreateCourseSection />}
+        {activeTab === "createSubject" && (
+  <CreateSubjectForm
+    courses={courses}
+    semesters={subjectSemesterOptions}
+    formData={subjectFormData}
+    loading={loading}
+    isSemesterDisabled={isSubjectSemesterDisabled}
+    onChange={handleSubjectFormChange}
+    onCourseChange={handleSubjectCourseChange}
+    onSemesterChange={handleSubjectSemesterChange}
+    onSubmit={handleSubjectFormSubmit}
+  />
+)}
+
+
         {activeTab === "upload" && (
           <UploadForm
             courses={courses}

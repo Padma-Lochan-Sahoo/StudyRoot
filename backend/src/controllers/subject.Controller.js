@@ -1,4 +1,6 @@
 import Subject from "../models/Subject.js";
+import Semester from "../models/Semester.js";
+
 
 // Get all subjects
 export const getAllSubjects = async (req, res) => {
@@ -13,13 +15,44 @@ export const getAllSubjects = async (req, res) => {
 // Create a new subject
 export const createSubject = async (req, res) => {
   try {
-    const subject = new Subject(req.body);
-    await subject.save();
+    const { name, subjectCode, course, semesterNumber } = req.body;
+
+    if (!name || !subjectCode || !course || !semesterNumber) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // ✅ Fix: Use correct field name: number (not semesterNumber)
+    const semester = await Semester.findOne({
+      course,
+      number: semesterNumber,
+    });
+
+    if (!semester) {
+      return res.status(404).json({ message: "Semester not found" });
+    }
+
+    const existing = await Subject.findOne({
+      name,
+      semester: semester._id,
+    });
+
+    if (existing) {
+      return res.status(409).json({ message: "Subject already exists in this semester" });
+    }
+
+    const subject = await Subject.create({
+      name,
+      subjectCode,
+      semester: semester._id,
+    });
+
     res.status(201).json(subject);
   } catch (error) {
-    res.status(400).json({ message: "Error creating subject", error });
+    console.error("Error creating subject:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Get a subject by ID
 export const getSubjectById = async (req, res) => {

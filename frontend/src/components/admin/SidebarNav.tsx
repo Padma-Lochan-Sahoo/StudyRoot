@@ -83,6 +83,18 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
 
   const navigationItems = [
     {
+    id: "createCourse",
+    label: "Create Course",
+    icon: GraduationCap,
+    onClick: () => handleTabChange("createCourse"),
+  },
+  {
+    id: "createSubject",
+    label: "Create Subject",
+    icon: BookOpen,
+    onClick: () => handleTabChange("createSubject"),
+  },
+    {
       id: "upload",
       label: "Upload Notes",
       icon: Upload,
