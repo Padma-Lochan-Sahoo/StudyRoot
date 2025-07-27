@@ -4,10 +4,11 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, ChevronRight, Home, Calendar } from "lucide-react";
-import UserDropdown from "@/components/UserDropdown";
+import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar"; 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useState } from "react";
+import { Search } from 'lucide-react'
 import axios from "@/lib/axiosInstance"; // or just "axios" if not using custom instance
 
 const CourseView = () => {
@@ -91,6 +92,9 @@ useEffect(() => {
             Select a semester to access subject-wise notes and study materials.
           </p>
         </div>
+
+
+
 
         {/* Semester Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

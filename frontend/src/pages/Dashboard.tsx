@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import {
   GraduationCap,
@@ -13,11 +14,11 @@ import {
   Code,
   Building,
   Briefcase,
-  MoreHorizontal
+  MoreHorizontal,
+  Search,
 } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import Navbar from "@/components/Navbar";
-import { useAuthStore } from "@/store/useAuthStore";
 import axios from "@/lib/axiosInstance";
 
 // Meta map to assign icons & colors based on course name
@@ -26,14 +27,14 @@ const courseMeta = {
   MCA: { icon: BookOpen, color: "from-purple-500 to-pink-500" },
   BCA: { icon: Building, color: "from-green-500 to-teal-500" },
   MBA: { icon: Briefcase, color: "from-orange-500 to-red-500" },
-  others: { icon: MoreHorizontal, color: "from-gray-500 to-slate-500" }
+  others: { icon: MoreHorizontal, color: "from-gray-500 to-slate-500" },
 };
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // ✅ Top level
-  const { authUser } = useAuthStore(); // ✅ Top level
+  const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -53,7 +54,9 @@ const Dashboard = () => {
     getCourses();
   }, []);
 
-
+  const filteredCourses = courses.filter((course) =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (error) {
     return <div className="text-center text-red-500 py-12">{error}</div>;
@@ -79,43 +82,63 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {/* Search Input */}
+        <div className="flex justify-center mb-10">
+          <div className="w-full max-w-md relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-uninote-purple"
+            />
+          </div>
+        </div>
+
         {/* Course Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map((course) => {
-const metaKey = Object.keys(courseMeta).find(key => course.name.startsWith(key));
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => {
+              const metaKey = Object.keys(courseMeta).find((key) =>
+                course.name.startsWith(key)
+              );
+              const meta = courseMeta[metaKey] || courseMeta.others;
+              const IconComponent = meta.icon || GraduationCap;
+              const color = meta.color || "from-gray-500 to-slate-500";
 
-const meta = courseMeta[metaKey] || courseMeta.others; 
-const IconComponent = meta.icon || GraduationCap;
-const color = meta.color || "from-gray-500 to-slate-500";
-
-            return (
-              <Card
-                key={course._id}
-                className="group bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-onClick={() => navigate(`/dashboard/${course._id}`)}
-              >
-                <CardHeader className="text-center pb-4">
-                  <div
-                    className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <IconComponent className="h-8 w-8 text-white" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-800 group-hover:text-uninote-blue transition-colors">
-                    {course.name}
-                  </CardTitle>
-
-                  <div className="text-sm text-gray-500 mt-2">
-                    {course.totalSemesters} Semesters
-                  </div>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <Button className="w-full bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300">
-                    View Semesters
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+              return (
+                <Card
+                  key={course._id}
+                  className="group bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  onClick={() => navigate(`/dashboard/${course._id}`)}
+                >
+                  <CardHeader className="text-center pb-4">
+                    <div
+                      className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <IconComponent className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-gray-800 group-hover:text-uninote-blue transition-colors">
+                      {course.name}
+                    </CardTitle>
+                    <div className="text-sm text-gray-500 mt-2">
+                      {course.totalSemesters} Semesters
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <Button className="w-full bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-white font-medium rounded-xl transition-all duration-300">
+                      View Semesters
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            <p className="text-center text-gray-500 col-span-full">
+              No courses found for "{searchQuery}"
+            </p>
+          )}
         </div>
 
         {/* Stats */}
