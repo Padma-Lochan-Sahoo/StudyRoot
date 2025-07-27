@@ -66,6 +66,25 @@ export const sendOtpEmail = async (email, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
+export const sendMail = async (email, subject, htmlContent) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: subject,
+    html: htmlContent,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 // API Error class
 export class ApiError extends Error {
   constructor(statusCode, message = "Something went wrong", errors = [], stack = "") {
