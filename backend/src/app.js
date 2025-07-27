@@ -28,6 +28,7 @@ import noteRoute from "./routes/noteRoutes.js";
 
 import profileRoute from "./routes/profileRoutes.js";
 import dashboardRoute from "./routes/dashboardRoutes.js";
+import commentRoute from "./routes/commentRoutes.js";
 
 // routes declaration
 app.use("/api/auth", authRoute);
@@ -36,6 +37,7 @@ app.use("/api/semesters", semesterRoute);
 app.use("/api/subjects", subjectRoute);
 // app.use("/api/notes", noteRoute);
 app.use("/api/notes", noteRoute);
+app.use("/api/comments", commentRoute);
 
 app.use("/api/profile", profileRoute);
 app.use("/api/dashboard", dashboardRoute);
