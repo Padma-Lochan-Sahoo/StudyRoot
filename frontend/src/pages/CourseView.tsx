@@ -63,7 +63,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
       {/* Navigation */}
-      <Navbar userName={authUser?.fullName || "Guest"} />
+      <Navbar />
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

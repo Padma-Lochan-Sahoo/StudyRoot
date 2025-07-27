@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +9,6 @@ import {
 } from "@/components/ui/card";
 import {
   GraduationCap,
-  LogOut,
-  User,
   BookOpen,
   Code,
   Building,
@@ -55,9 +53,7 @@ const Dashboard = () => {
     getCourses();
   }, []);
 
-  if (loading) {
-    return <div className="text-center py-12">Loading courses...</div>;
-  }
+
 
   if (error) {
     return <div className="text-center text-red-500 py-12">{error}</div>;
@@ -65,7 +61,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
-      <Navbar userName={authUser?.fullName || "Guest"} />
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
