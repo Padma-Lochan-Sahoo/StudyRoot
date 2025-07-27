@@ -1,14 +1,9 @@
-
 import dotenv from "dotenv";
 import connectDB from "./lib/db.js";
 import { app } from "./app.js";
 import connectCloudinary from "./lib/cloudinary.js";
 
-
-
 dotenv.config();
-
-
 
 const startServer = async () => {
   try {

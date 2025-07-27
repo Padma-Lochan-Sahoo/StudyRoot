@@ -6,33 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   User, 
   GraduationCap, 
-  Settings, 
-  Activity, 
   Shield, 
   Trash2, 
   Camera, 
   Save, 
   Edit, 
   X,
-  Download,
-  Heart,
-  Calendar,
-  MapPin,
-  Phone,
-  Mail,
-  BookOpen,
-  Building,
-  Hash,
-  Globe
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useToast } from "@/hooks/use-toast";
@@ -134,9 +120,7 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  /**
-   * Fetches the user profile from the backend and populates the state.
-   */
+
   const fetchProfile = async () => {
     setIsLoading(true);
     try {
@@ -179,11 +163,7 @@ const Profile = () => {
     }
   };
 
-  /**
-   * Handles input changes for the main profile form.
-   * @param {string} field - The name of the form field.
-   * @param {string} value - The new value of the form field.
-   */
+  
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -191,16 +171,7 @@ const Profile = () => {
     }));
   };
 
-  /**
-   * Handles changes for the preferences form.
-   * @param {string} field - The name of the preference field.
-   * @param {any} value - The new value of the preference field.
-   */
 
-
-  /**
-   * Saves the updated personal and academic profile information.
-   */
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
@@ -227,13 +198,6 @@ const Profile = () => {
     }
   };
 
-  /**
-   * Saves the updated user preferences.
-   */
-
-  /**
-   * Handles the password change request.
-   */
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
@@ -321,7 +285,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navbar userName={authUser?.fullName || "Guest"} />
+        <Navbar/>
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-uninote-blue"></div>
         </div>
@@ -333,7 +297,7 @@ const Profile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navbar userName={authUser?.fullName || "Guest"} />
+        <Navbar/>
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Not Found</h2>
@@ -347,7 +311,7 @@ const Profile = () => {
   // Main component render
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Navbar userName={authUser?.fullName || "Guest"} />
+      <Navbar />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
@@ -430,29 +394,50 @@ const Profile = () => {
 
         {/* Profile Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-         <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-2">
-  <TabsTrigger value="personal" className="flex items-center justify-center space-x-2">
+<TabsList
+  className="flex w-full justify-around bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 
+             text-white rounded-xl p-2 shadow-lg backdrop-blur-md"
+>
+  <TabsTrigger
+    value="personal"
+    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
+               hover:bg-white/10"
+  >
     <User className="h-4 w-4" />
     <span className="hidden sm:inline">Personal</span>
   </TabsTrigger>
 
-  <TabsTrigger value="academic" className="flex items-center justify-center space-x-2">
+  <TabsTrigger
+    value="academic"
+    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
+               hover:bg-white/10"
+  >
     <GraduationCap className="h-4 w-4" />
     <span className="hidden sm:inline">Academic</span>
   </TabsTrigger>
 
-  <TabsTrigger value="security" className="flex items-center justify-center space-x-2">
+  <TabsTrigger
+    value="security"
+    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
+               hover:bg-white/10"
+  >
     <Shield className="h-4 w-4" />
     <span className="hidden sm:inline">Security</span>
   </TabsTrigger>
 </TabsList>
 
 
+<div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent my-4" />
+
+
           {/* Personal Information Tab */}
-          <TabsContent value="personal">
+          <TabsContent value="personal" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
               <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
+                <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Personal Information</CardTitle>
                 <CardDescription>Update your personal details and contact information.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -480,10 +465,10 @@ const Profile = () => {
           </TabsContent>
 
           {/* Academic Information Tab */}
-          <TabsContent value="academic">
+          <TabsContent value="academic" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
               <CardHeader>
-                <CardTitle>Academic Information</CardTitle>
+                <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Academic Information</CardTitle>
                 <CardDescription>Update your academic details and course information.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -509,15 +494,10 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
-    
-
-          {/* Activity Tab */}
-        
-
           {/* Security Tab */}
-          <TabsContent value="security" className="space-y-6">
+          <TabsContent value="security" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
-              <CardHeader><CardTitle>Change Password</CardTitle><CardDescription>Update your account password.</CardDescription></CardHeader>
+              <CardHeader><CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Change Password</CardTitle><CardDescription>Update your account password.</CardDescription></CardHeader>
               <CardContent className="space-y-4">
                 <div><Label htmlFor="currentPassword">Current Password</Label><Input id="currentPassword" type="password" value={passwordData.currentPassword} onChange={(e) => setPasswordData(p => ({...p, currentPassword: e.target.value}))} /></div>
                 <div><Label htmlFor="newPassword">New Password</Label><Input id="newPassword" type="password" value={passwordData.newPassword} onChange={(e) => setPasswordData(p => ({...p, newPassword: e.target.value}))} /></div>

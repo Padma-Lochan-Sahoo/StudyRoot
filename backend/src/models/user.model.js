@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
       default: "user",
       enum: ["user", "admin"],
     },
-    
+
     // Personal Information
     phoneNumber: {
       type: String,
@@ -105,20 +105,24 @@ const userSchema = new mongoose.Schema(
         type: Number,
         default: 0,
       },
-      favoriteNotes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Note",
-      }],
-      downloadHistory: [{
-        noteId: {
+      favoriteNotes: [
+        {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Note",
         },
-        downloadedAt: {
-          type: Date,
-          default: Date.now,
+      ],
+      downloadHistory: [
+        {
+          noteId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Note",
+          },
+          downloadedAt: {
+            type: Date,
+            default: Date.now,
+          },
         },
-      }],
+      ],
     },
     // Profile completion
     profileCompletion: {
@@ -132,7 +136,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Calculate profile completion percentage
-userSchema.methods.calculateProfileCompletion = function() {
+userSchema.methods.calculateProfileCompletion = function () {
   const fields = [
     this.fullName,
     this.email,
@@ -146,18 +150,18 @@ userSchema.methods.calculateProfileCompletion = function() {
     this.studentId,
     this.branch,
   ];
-  
-  const completedFields = fields.filter(field => field && field !== "").length;
+
+  const completedFields = fields.filter(
+    (field) => field && field !== ""
+  ).length;
   return Math.round((completedFields / fields.length) * 100);
 };
 
 // Update profile completion before saving
-userSchema.pre('save', function(next) {
+userSchema.pre("save", function (next) {
   this.profileCompletion = this.calculateProfileCompletion();
   next();
 });
-
-
 
 const User = mongoose.model("User", userSchema);
 

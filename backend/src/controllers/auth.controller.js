@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { Otp, PasswordResetOtp } from "../models/otp.model.js";
-import User from "../models/user.model.js"
+import User from "../models/user.model.js";
 import { generateOTP, sendOtpEmail, generateToken } from "../lib/utils.js";
 
 export const signup = async (req, res) => {
@@ -123,12 +123,18 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Email not found. Please check your email or sign up." });
+      return res
+        .status(400)
+        .json({
+          message: "Email not found. Please check your email or sign up.",
+        });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect password. Please try again." });
+      return res
+        .status(400)
+        .json({ message: "Incorrect password. Please try again." });
     }
 
     const token = generateToken(user._id, res);
@@ -163,16 +169,14 @@ export const logout = (req, res) => {
   }
 };
 
-
-
-export const checkAuth = (req,res) => {
-    try {
-      return res.status(200).json(req.user)   
-    } catch (error) {
-      console.log(`Error in check Auth Controller ${error.message}`);
-      return res.status(500).json({ message: "Internal server Error"})
-    }
-}
+export const checkAuth = (req, res) => {
+  try {
+    return res.status(200).json(req.user);
+  } catch (error) {
+    console.log(`Error in check Auth Controller ${error.message}`);
+    return res.status(500).json({ message: "Internal server Error" });
+  }
+};
 
 // Forgot Password - Send OTP
 export const forgotPassword = async (req, res) => {
@@ -186,7 +190,9 @@ export const forgotPassword = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "User with this email does not exist" });
+      return res
+        .status(400)
+        .json({ message: "User with this email does not exist" });
     }
 
     // Remove previous password reset OTPs
@@ -205,10 +211,14 @@ export const forgotPassword = async (req, res) => {
     await otpDoc.save();
     await sendOtpEmail(email, otp);
 
-    return res.status(200).json({ message: "Password reset OTP sent successfully" });
+    return res
+      .status(200)
+      .json({ message: "Password reset OTP sent successfully" });
   } catch (err) {
     console.error("forgotPassword error:", err);
-    return res.status(500).json({ message: "Failed to send password reset OTP" });
+    return res
+      .status(500)
+      .json({ message: "Failed to send password reset OTP" });
   }
 };
 
@@ -234,7 +244,8 @@ export const verifyPasswordResetOtp = async (req, res) => {
 
     const now = new Date();
     const diff = (now - otpDoc.createdAt) / 1000;
-    if (diff > 300) { // 5 minutes
+    if (diff > 300) {
+      // 5 minutes
       await PasswordResetOtp.deleteOne({ _id: otpDoc._id });
       return res.status(400).json({ message: "OTP expired" });
     }
@@ -256,17 +267,25 @@ export const resetPassword = async (req, res) => {
 
   try {
     if (!email || !newPassword) {
-      return res.status(400).json({ message: "Email and new password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and new password are required" });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
     }
 
     // Check if there's a verified OTP for this email
     const otpDoc = await PasswordResetOtp.findOne({ email, verified: true });
     if (!otpDoc) {
-      return res.status(400).json({ message: "No verified OTP found. Please verify your OTP first." });
+      return res
+        .status(400)
+        .json({
+          message: "No verified OTP found. Please verify your OTP first.",
+        });
     }
 
     const now = new Date();
@@ -343,7 +362,9 @@ export const resendPasswordResetOtp = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "User with this email does not exist" });
+      return res
+        .status(400)
+        .json({ message: "User with this email does not exist" });
     }
     // Find the previous PasswordResetOtp document to preserve verified status
     const previousOtp = await PasswordResetOtp.findOne({ email });
@@ -360,9 +381,13 @@ export const resendPasswordResetOtp = async (req, res) => {
     });
     await otpDoc.save();
     await sendOtpEmail(email, otp);
-    return res.status(200).json({ message: "Password reset OTP resent successfully" });
+    return res
+      .status(200)
+      .json({ message: "Password reset OTP resent successfully" });
   } catch (err) {
     console.error("resendPasswordResetOtp error:", err);
-    return res.status(500).json({ message: "Failed to resend password reset OTP" });
+    return res
+      .status(500)
+      .json({ message: "Failed to resend password reset OTP" });
   }
 };
