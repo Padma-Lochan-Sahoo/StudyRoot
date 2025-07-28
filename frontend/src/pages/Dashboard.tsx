@@ -35,7 +35,7 @@ const Dashboard = () => {
       title: "Quiz Generator",
       description: "Create and take quizzes",
       icon: FileText,
-      onClick: () => navigate("/quiz-generator"),
+      onClick: () => navigate("/generate-mcq"),
     },
     {
       title: "AI Summarize",

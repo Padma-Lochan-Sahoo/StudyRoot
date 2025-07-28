@@ -13,6 +13,7 @@ import SubjectView from "./pages/SubjectView";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import GenerateMCQ from "./pages/GenerateMCQ";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
@@ -162,12 +163,22 @@ const App = () => {
             }
           />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+  <Route path="*" element={<NotFound />} />
+  <Route
+    path="/generate-mcq"
+    element={
+      <ProtectedRoute allowedRoles={["admin", "user"]}>
+        <GenerateMCQ />
+      </ProtectedRoute>
+    }
+  />
+</Routes>
 
       </TooltipProvider>
     </QueryClientProvider>
   );
 };
+
+
 
 export default App;
