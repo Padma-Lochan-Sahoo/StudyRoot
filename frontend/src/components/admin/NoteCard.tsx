@@ -19,7 +19,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
   };
 
   return (
-    <Card className={`bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 ${getFileTypeColor(note.fileFormat)} group`}>
+    <Card className={`bg-card/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 ${getFileTypeColor(note.fileFormat)} group`}>
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           {/* Main content area */}
@@ -30,23 +30,23 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
             <div className="flex-1 min-w-0">
               {/* Title and format badge */}
               <div className="flex items-start justify-between mb-1 sm:mb-2">
-                <h3 className="text-base sm:text-lg font-bold text-gray-800 line-clamp-2 sm:line-clamp-1 pr-2 sm:pr-4 flex-1">{note.title}</h3>
-                <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-full shrink-0 ml-2">
+                <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-2 sm:line-clamp-1 pr-2 sm:pr-4 flex-1">{note.title}</h3>
+                <span className="text-xs font-medium px-2 py-1 bg-muted text-muted-foreground rounded-full shrink-0 ml-2">
                   {note.fileFormat?.toUpperCase() || 'FILE'}
                 </span>
               </div>
-              
+
               {/* Course info */}
-              <p className="text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-1">
+              <p className="text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-1">
                 {note.subject?.semester?.course?.name}
                 <span className="hidden sm:inline"> • Semester {note.subject?.semester?.number} • {note.subject?.name}</span>
               </p>
-              <p className="text-sm text-gray-500 mb-2 sm:hidden">
+              <p className="text-sm text-muted-foreground mb-2 sm:hidden">
                 Semester {note.subject?.semester?.number} • {note.subject?.name}
               </p>
-              
+
               {/* Metadata */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-2 text-xs sm:text-sm text-gray-500">
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-2 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center space-x-1">
                   <User className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="truncate">
@@ -68,7 +68,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex space-x-2 sm:shrink-0 sm:ml-4">
             <Button

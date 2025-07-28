@@ -30,7 +30,7 @@ const Navigation = () => {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-300/40 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-gray-300/40 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -47,21 +47,19 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-8">
             <a
               href="#features"
-              className={`font-medium transition-all border-b-2 pb-1 ${
-                activeSection === "features"
+              className={`font-medium transition-all border-b-2 pb-1 ${activeSection === "features"
                   ? "text-uninote-blue border-uninote-blue"
-                  : "text-gray-700 border-transparent hover:text-uninote-blue"
-              }`}
+                  : "text-muted-foreground border-transparent hover:text-uninote-blue"
+                }`}
             >
               Features
             </a>
             <a
               href="#about"
-              className={`font-medium transition-all border-b-2 pb-1 ${
-                activeSection === "about"
+              className={`font-medium transition-all border-b-2 pb-1 ${activeSection === "about"
                   ? "text-uninote-purple border-uninote-purple"
-                  : "text-gray-700 border-transparent hover:text-uninote-purple"
-              }`}
+                  : "text-muted-foreground border-transparent hover:text-uninote-purple"
+                }`}
             >
               About
             </a>
@@ -84,7 +82,7 @@ const Navigation = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-uninote-purple transition-colors"
+              className="text-muted-foreground hover:text-uninote-purple transition-colors"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -93,20 +91,18 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200/50 py-4 bg-white/80 backdrop-blur-lg rounded-b-xl shadow-md">
+          <div className="md:hidden border-t border-gray-200/50 py-4 bg-background/80 backdrop-blur-lg rounded-b-xl shadow-md">
             <div className="flex flex-col space-y-4">
-              <a href="#features" className={`font-medium px-4 ${
-                activeSection === "features"
+              <a href="#features" className={`font-medium px-4 ${activeSection === "features"
                   ? "text-uninote-blue underline"
-                  : "text-gray-700 hover:text-uninote-blue"
-              }`}>
+                  : "text-muted-foreground hover:text-uninote-blue"
+                }`}>
                 Features
               </a>
-              <a href="#about" className={`font-medium px-4 ${
-                activeSection === "about"
+              <a href="#about" className={`font-medium px-4 ${activeSection === "about"
                   ? "text-uninote-purple underline"
-                  : "text-gray-700 hover:text-uninote-purple"
-              }`}>
+                  : "text-muted-foreground hover:text-uninote-purple"
+                }`}>
                 About
               </a>
               <div className="flex flex-col space-y-2 px-4">

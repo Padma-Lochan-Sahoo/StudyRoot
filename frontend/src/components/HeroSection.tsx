@@ -21,7 +21,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50 relative overflow-hidden">
+    <section className="min-h-screen bg-background relative overflow-hidden">
       {/* Layered, Animated Backgrounds */}
       <div
         className="absolute inset-0 transition-transform duration-300 ease-out"
@@ -56,13 +56,13 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
           {/* Left */}
           <div className="text-center lg:text-left animate-fade-in-up">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-uninote-dark leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
               All Your University Notes, {" "}
               <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
                 One Click Away
               </span>
             </h1>
-            <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto lg:mx-0">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto lg:mx-0">
               UniNote makes accessing semester-wise, subject-wise notes easier than ever. From B.Tech to MBA – get what you need, when you need it.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
@@ -90,7 +90,7 @@ const HeroSection = () => {
               ].map(({ stat, label, color }, idx) => (
                 <div key={idx} className="text-center">
                   <div className={`text-3xl font-bold ${color} mb-1`}>{stat}</div>
-                  <div className="text-gray-600 text-sm">{label}</div>
+                  <div className="text-muted-foreground text-sm">{label}</div>
                 </div>
               ))}
             </div>
@@ -98,8 +98,8 @@ const HeroSection = () => {
 
           {/* Right */}
           <div className="relative animate-slide-in-right">
-            <div className="bg-white/30 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-white/20 hover:rotate-1 transition-transform duration-500">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <div className="bg-card/80 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-white/20 hover:rotate-1 transition-transform duration-500">
+              <div className="bg-card rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-4 text-white">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-white/30 rounded-full"></div>
@@ -112,13 +112,13 @@ const HeroSection = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border">
                       <BookOpen className="h-8 w-8 text-uninote-blue mb-2" />
-                      <div className="text-sm font-semibold text-gray-800">B.Tech</div>
-                      <div className="text-xs text-gray-600">Engineering</div>
+                      <div className="text-sm font-semibold text-foreground">B.Tech</div>
+                      <div className="text-xs text-muted-foreground">Engineering</div>
                     </div>
                     <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border">
                       <Users className="h-8 w-8 text-uninote-purple mb-2" />
-                      <div className="text-sm font-semibold text-gray-800">MCA</div>
-                      <div className="text-xs text-gray-600">Computer Apps</div>
+                      <div className="text-sm font-semibold text-foreground">MCA</div>
+                      <div className="text-xs text-muted-foreground">Computer Apps</div>
                     </div>
                   </div>
                   {["Data Structures", "Database Systems", "Operating Systems"].map((subject, i) => (
@@ -127,8 +127,8 @@ const HeroSection = () => {
                       className="flex items-center space-x-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border"
                     >
                       <div className={`w-2 h-2 rounded-full ${i === 0 ? "bg-uninote-blue" : i === 1 ? "bg-uninote-purple" : "bg-green-500"}`}></div>
-                      <span className="text-sm text-gray-700">{subject}</span>
-                      <div className="ml-auto text-xs text-gray-500">PDF</div>
+                      <span className="text-sm text-foreground">{subject}</span>
+                      <div className="ml-auto text-xs text-muted-foreground">PDF</div>
                     </div>
                   ))}
                 </div>
@@ -136,11 +136,11 @@ const HeroSection = () => {
             </div>
 
             {/* Floating Icons */}
-            <div className="absolute -top-4 -right-4 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/30 animate-float">
+            <div className="absolute -top-4 -right-4 bg-card/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/30 animate-float">
               <Award className="h-8 w-8 text-uninote-blue" />
             </div>
             <div
-              className="absolute -bottom-4 -left-4 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/30 animate-float delay-1000"
+              className="absolute -bottom-4 -left-4 bg-card/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/30 animate-float delay-1000"
             >
               <Shield className="h-8 w-8 text-uninote-purple" />
             </div>

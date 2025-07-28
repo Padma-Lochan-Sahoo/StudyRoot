@@ -50,20 +50,20 @@ const CreateCourseSection = () => {
 
   return (
     <div className="w-full max-w-2xl">
-      <h1 className="text-3xl font-bold text-gray-800 mb-1">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
         Create <span className="text-uninote-purple">Course</span>
       </h1>
-      <p className="text-gray-500 mb-6">
+      <p className="text-gray-500 dark:text-gray-400 mb-6">
         Add a new course and define its total number of semesters.
       </p>
 
-      <Card className="bg-white shadow-lg rounded-xl border border-gray-100">
+      <Card className="bg-white dark:bg-gray-900 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800">
+          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800 dark:text-gray-100">
             <GraduationCap className="h-5 w-5" />
             <span>Add New Course</span>
           </CardTitle>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Enter course name and number of semesters.
           </p>
         </CardHeader>
@@ -78,6 +78,7 @@ const CreateCourseSection = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 
@@ -91,6 +92,7 @@ const CreateCourseSection = () => {
                 value={semesters}
                 onChange={(e) => setSemesters(e.target.value)}
                 required
+                className="dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 

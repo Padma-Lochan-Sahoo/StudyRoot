@@ -47,20 +47,20 @@ const CreateSubjectForm: React.FC<CreateSubjectFormProps> = ({
 }) => {
   return (
     <div className="w-full max-w-2xl">
-      <h1 className="text-3xl font-bold text-gray-800 mb-1">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
         Create <span className="text-uninote-purple">Subject</span>
       </h1>
-      <p className="text-gray-500 mb-6">
+      <p className="text-gray-500 dark:text-gray-400 mb-6">
         Add subjects under selected course and semester.
       </p>
 
-      <Card className="bg-white shadow-lg rounded-xl border border-gray-100">
+      <Card className="bg-white dark:bg-gray-900 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800">
+          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800 dark:text-gray-100">
             <BookOpen className="h-5 w-5" />
             <span>Add New Subject</span>
           </CardTitle>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Select course, semester and enter subject name and code.
           </p>
         </CardHeader>
@@ -70,7 +70,7 @@ const CreateSubjectForm: React.FC<CreateSubjectFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Course</Label>
-                <Select value={formData.course} onValueChange={onCourseChange}>
+                <Select value={formData.course} onValueChange={onCourseChange} className="dark:bg-gray-800 dark:text-gray-100">
                   <SelectTrigger>
                     <SelectValue placeholder="Select Course" />
                   </SelectTrigger>
@@ -93,6 +93,7 @@ const CreateSubjectForm: React.FC<CreateSubjectFormProps> = ({
                     const selected = semesters.find((s) => s._id === value);
                     onSemesterChange(value, selected?.number || 0);
                   }}
+                  className="dark:bg-gray-800 dark:text-gray-100"
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Semester" />
@@ -118,6 +119,7 @@ const CreateSubjectForm: React.FC<CreateSubjectFormProps> = ({
                 onChange={(e) => onChange("subjectName", e.target.value)}
                 placeholder="Enter subject name"
                 required
+                className="dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 
@@ -129,6 +131,7 @@ const CreateSubjectForm: React.FC<CreateSubjectFormProps> = ({
                 onChange={(e) => onChange("subjectCode", e.target.value)}
                 placeholder="Enter subject code"
                 required
+                className="dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 

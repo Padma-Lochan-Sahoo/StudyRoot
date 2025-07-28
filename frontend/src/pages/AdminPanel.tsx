@@ -29,10 +29,10 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [noteBeingEdited, setNoteBeingEdited] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   // Delete confirmation state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [noteToDelete, setNoteToDelete] = useState<{id: string, title: string} | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<{ id: string, title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [courses, setCourses] = useState<any[]>([]);
@@ -129,7 +129,7 @@ console.log("Submitting subject with semester ID:", semester);
 
 
   // Logout handler
- 
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -228,14 +228,14 @@ console.log("Submitting subject with semester ID:", semester);
   // Actual delete function
   const handleConfirmDelete = async () => {
     if (!noteToDelete) return;
-    
+
     try {
       setIsDeleting(true);
       await axios.delete(`/notes/${noteToDelete.id}`);
       setUploadedNotes((prev) => prev.filter((note) => note._id !== noteToDelete.id));
-      toast({ 
-        title: "Deleted", 
-        description: `"${noteToDelete.title}" has been deleted successfully.` 
+      toast({
+        title: "Deleted",
+        description: `"${noteToDelete.title}" has been deleted successfully.`
       });
     } catch (err) {
       toast({
@@ -283,7 +283,7 @@ console.log("Submitting subject with semester ID:", semester);
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50 flex">
+    <div className="min-h-screen bg-background flex">
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex justify-center items-start p-10">
@@ -348,23 +348,23 @@ console.log("Submitting subject with semester ID:", semester);
         )}
 
         {activeTab === "users" && (
-  <ManageUsersSection />
-)}
+          <ManageUsersSection />
+        )}
 
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-red-600">Delete Note</AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-600">
+              <AlertDialogTitle className="text-destructive-foreground">Delete Note</AlertDialogTitle>
+              <AlertDialogDescription className="text-muted-foreground">
                 Are you sure you want to delete "{noteToDelete?.title}"? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel 
+              <AlertDialogCancel
                 onClick={handleCancelDelete}
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                className="border-gray-300 text-muted-foreground hover:bg-gray-50"
               >
                 Cancel
               </AlertDialogCancel>

@@ -32,7 +32,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById("sidebar");
       const menuButton = document.getElementById("menu-button");
-      
+
       if (
         isMobileOpen &&
         sidebar &&
@@ -126,18 +126,18 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
       <button
         id="menu-button"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl p-3 shadow-lg hover:shadow-xl transition-all duration-200"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-card/95 backdrop-blur-sm border border-gray-200/50 rounded-xl p-3 shadow-lg hover:shadow-xl transition-all duration-200"
       >
         {isMobileOpen ? (
-          <X className="h-5 w-5 text-gray-700" />
+          <X className="h-5 w-5 text-foreground" />
         ) : (
-          <Menu className="h-5 w-5 text-gray-700" />
+          <Menu className="h-5 w-5 text-foreground" />
         )}
       </button>
 
       {/* Overlay for mobile */}
       {isMobileOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200"
           onClick={() => setIsMobileOpen(false)}
         />
@@ -149,7 +149,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
         className={`
           fixed lg:relative inset-y-0 left-0 z-50
           ${isCollapsed ? "w-20" : "w-64"}
-          bg-white/95 backdrop-blur-xl border-r border-gray-200/50
+          bg-card/95 backdrop-blur-xl border-r border-gray-200/50
           transform transition-all duration-300 ease-in-out
           ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           shadow-2xl lg:shadow-none
@@ -169,13 +169,13 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                   </span>
                 )}
               </div>
-              
+
               {/* Collapse Button - Desktop only */}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="hidden lg:block p-2 hover:bg-muted rounded-lg transition-colors"
               >
-                <ChevronRight className={`h-4 w-4 text-gray-500 transition-transform ${isCollapsed ? "rotate-0" : "rotate-180"}`} />
+                <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isCollapsed ? "rotate-0" : "rotate-180"}`} />
               </button>
             </div>
 
@@ -195,7 +195,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
             {navigationItems.map((item) => {
               const isActive = activeTab === item.id;
               const Icon = item.icon;
-              
+
               return (
                 <button
                   key={item.id}
@@ -205,7 +205,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                     transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
                     ${isActive
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/25"
-                      : "text-gray-700 hover:bg-gray-100/80 hover:text-gray-900"
+                      : "text-foreground hover:bg-muted hover:text-foreground"
                     }
                     ${isCollapsed ? "justify-center" : ""}
                   `}
@@ -214,12 +214,12 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
                   {!isCollapsed && (
                     <span className="font-medium text-sm">{item.label}</span>
                   )}
-                  
+
                   {/* Active Indicator */}
                   {isActive && !isCollapsed && (
                     <div className="absolute right-3 w-2 h-2 bg-white rounded-full opacity-80" />
                   )}
-                  
+
                   {/* Tooltip for collapsed state */}
                   {isCollapsed && (
                     <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
@@ -245,7 +245,7 @@ const SidebarNav = ({ activeTab, setActiveTab }: SidebarNavProps) => {
             >
               <LogOut className="h-4 w-4" />
               {!isCollapsed && <span className="ml-2 font-medium">Logout</span>}
-              
+
               {/* Tooltip for collapsed logout */}
               {isCollapsed && (
                 <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">

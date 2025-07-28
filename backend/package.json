@@ -21,17 +21,27 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+<<<<<<< HEAD
     "form-data": "^4.0.4",
+=======
+    "express-session": "^1.18.2",
+>>>>>>> 66a4f92e0b1392970124ef3424572ecdbb99c670
     "jsonwebtoken": "^9.0.2",
     "mammoth": "^1.9.1",
     "mongoose": "^8.16.3",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "nodemon": "^3.1.10",
+<<<<<<< HEAD
     "openai": "^5.10.2",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^5.4.54",
     "streamifier": "^0.1.1",
     "textract": "^2.5.0"
+=======
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "streamifier": "^0.1.1"
+>>>>>>> 66a4f92e0b1392970124ef3424572ecdbb99c670
   }
 }
