@@ -50,6 +50,15 @@ const Navbar = () => {
                 />
               </div>
             </div>
+            {/* New Quizzes Link */}
+            <div className="relative">
+              <Link
+                to="/generate-mcq"
+                className="text-white hover:text-purple-300 font-semibold px-3 py-2 rounded-md transition-colors duration-300"
+              >
+                Quizzes
+              </Link>
+            </div>
           </div>
         </div>
       </div>

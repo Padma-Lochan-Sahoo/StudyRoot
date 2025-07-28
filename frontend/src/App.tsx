@@ -147,11 +147,21 @@ const ADMIN_ONLY = ["admin"];
   />
 
   <Route path="*" element={<NotFound />} />
+  <Route
+    path="/generate-mcq"
+    element={
+      <ProtectedRoute allowedRoles={["admin", "user"]}>
+        <GenerateMCQ />
+      </ProtectedRoute>
+    }
+  />
 </Routes>
 
       </TooltipProvider>
     </QueryClientProvider>
   );
 };
+
+import GenerateMCQ from "./pages/GenerateMCQ";
 
 export default App;
