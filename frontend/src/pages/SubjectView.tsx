@@ -420,173 +420,185 @@ const SubjectView = () => {
         </div>
 
         {/* Loading & Error */}
-        {loading && (
-          <div className="text-center text-gray-500 py-6 sm:py-10 text-sm sm:text-base">Loading notes...</div>
-        )}
-        {error && (
-          <div className="text-center text-red-500 py-4 sm:py-6 text-sm sm:text-base px-4">{error}</div>
-        )}
+        {
+          loading && (
+            <div className="text-center text-gray-500 py-6 sm:py-10 text-sm sm:text-base">Loading notes...</div>
+          )
+        }
+        {
+          error && (
+            <div className="text-center text-red-500 py-4 sm:py-6 text-sm sm:text-base px-4">{error}</div>
+          )
+        }
 
         {/* Notes - Mobile Responsive */}
-        {!loading && !error && filteredNotes.length > 0 ? (
-          <div className="space-y-3 sm:space-y-4">
-            {filteredNotes.map((note) => (
-              <Card
-                key={note._id}
-                className={`bg-card/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.fileFormat)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
-              >
-                <CardContent className="p-3 sm:p-4 md:p-6">
-                  {/* Mobile Layout */}
-                  <div className="block sm:hidden">
-                    <div className="flex items-start space-x-3 mb-3">
-                      <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-lg">
-                        <FileText className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-foreground mb-2 break-words">{note.title}</h3>
-                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
-                          <span className="bg-muted px-2 py-1 rounded-full font-medium">
-                            {note.fileFormat}
-                          </span>
-                          <span className="bg-muted px-2 py-1 rounded-full">{note.fileSize}</span>
+        {
+          !loading && !error && filteredNotes.length > 0 ? (
+            <div className="space-y-3 sm:space-y-4">
+              {filteredNotes.map((note) => (
+                <Card
+                  key={note._id}
+                  className={`bg-card/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.fileFormat)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
+                >
+                  <CardContent className="p-3 sm:p-4 md:p-6">
+                    {/* Mobile Layout */}
+                    <div className="block sm:hidden">
+                      <div className="flex items-start space-x-3 mb-3">
+                        <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-lg">
+                          <FileText className="h-4 w-4 text-white" />
                         </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
-                          <div className="flex items-center space-x-1">
-                            <User className="h-3 w-3" />
-                            <span className="truncate max-w-[120px]">{userNames[note.uploadedBy?._id] || "Unknown"}</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-bold text-foreground mb-2 break-words">{note.title}</h3>
+                          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
+                            <span className="bg-muted px-2 py-1 rounded-full font-medium">
+                              {note.fileFormat}
+                            </span>
+                            <span className="bg-muted px-2 py-1 rounded-full">{note.fileSize}</span>
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{note.uploadDate}</span>
+                          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3" />
+                              <span className="truncate max-w-[120px]">{userNames[note.uploadedBy?._id] || "Unknown"}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{note.uploadDate}</span>
+                            </div>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Mobile Action Buttons */}
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex space-x-2">
+                          <div className="relative group flex-1">
+                            <Button
+                              onClick={() => isPreviewSupported(note.fileFormat) && handleView(note)}
+                              variant="outline"
+                              size="sm"
+                              disabled={!isPreviewSupported(note.fileFormat)}
+                              className={`w-full flex items-center justify-center space-x-1 border-uninote-blue text-uninote-blue text-xs
+                              ${isPreviewSupported(note.fileFormat) ? 'hover:bg-uninote-blue hover:text-white' : 'cursor-not-allowed opacity-50'}`}
+                            >
+                              <Eye className="h-3 w-3" />
+                              <span>View</span>
+                            </Button>
+                          </div>
+
+                          <div className="flex-1">
+                            <Button
+                              onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
+                              size="sm"
+                              className="w-full flex items-center justify-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-xs"
+                            >
+                              <Download className="h-3 w-3" />
+                              <span>Download</span>
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-muted-foreground font-medium px-2">
+                          <div>Views: {note.views?.toLocaleString() || 0}</div>
+                          <div>Downloads: {note.downloads.toLocaleString()}</div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Mobile Action Buttons */}
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex space-x-2">
-                        <div className="relative group flex-1">
-                          <Button
-                            onClick={() => isPreviewSupported(note.fileFormat) && handleView(note)}
-                            variant="outline"
-                            size="sm"
-                            disabled={!isPreviewSupported(note.fileFormat)}
-                            className={`w-full flex items-center justify-center space-x-1 border-uninote-blue text-uninote-blue text-xs
-                              ${isPreviewSupported(note.fileFormat) ? 'hover:bg-uninote-blue hover:text-white' : 'cursor-not-allowed opacity-50'}`}
-                          >
-                            <Eye className="h-3 w-3" />
-                            <span>View</span>
-                          </Button>
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl">
+                          <FileText className="h-6 w-6 text-white" />
                         </div>
 
                         <div className="flex-1">
+                          <h3 className="text-lg font-bold text-foreground mb-2">{note.title}</h3>
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                            <span className="bg-muted px-2 py-1 rounded-full font-medium">
+                              {note.fileFormat}
+                            </span>
+                            <span>{note.fileSize}</span>
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3" />
+                              <span>{userNames[note.uploadedBy?._id] || "Unknown"}</span>
+                            </div>
+
+                            <div className="flex items-center space-x-3 sm:space-x-4">
+                              <div className="flex items-center space-x-1">
+                                <User className="h-3 w-3" />
+                                <span className="truncate max-w-24 sm:max-w-none">{userNames[note.uploadedBy?._id] || "Unknown"}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Calendar className="h-3 w-3" />
+                                <span className="text-xs">{note.uploadDate}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div >
+                      </div >
+
+                      <div className="flex flex-col items-end space-y-2">
+                        <div className="flex space-x-2">
+                          <div className="relative group">
+                            <Button
+                              onClick={() => isPreviewSupported(note.fileFormat) && handleView(note)}
+                              variant="outline"
+                              size="sm"
+                              disabled={!isPreviewSupported(note.fileFormat)}
+                              className={`flex items-center space-x-1 border-uninote-blue text-uninote-blue 
+                              ${isPreviewSupported(note.fileFormat) ? 'hover:bg-uninote-blue hover:text-white' : 'cursor-not-allowed opacity-50'}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span>View</span>
+                            </Button>
+
+                            {!isPreviewSupported(note.fileFormat) && (
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-1 py-1 opacity-0 group-hover:opacity-40 transition-all duration-300 pointer-events-none">
+                                Preview not supported for this file type
+                              </div>
+                            )}
+                          </div>
+
                           <Button
                             onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
                             size="sm"
-                            className="w-full flex items-center justify-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-xs"
+                            className="flex-1 sm:flex-initial flex items-center justify-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue text-xs sm:text-sm h-8 sm:h-9"
                           >
-                            <Download className="h-3 w-3" />
+                            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>Download</span>
                           </Button>
                         </div>
-                      </div>
 
-                      <div className="flex justify-between text-xs text-muted-foreground font-medium px-2">
-                        <div>Views: {note.views?.toLocaleString() || 0}</div>
-                        <div>Downloads: {note.downloads.toLocaleString()}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-3 rounded-xl">
-                        <FileText className="h-6 w-6 text-white" />
-                      </div>
-
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-foreground mb-2">{note.title}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
-                          <span className="bg-muted px-2 py-1 rounded-full font-medium">
-                            {note.fileFormat}
+                        <div className="flex items-center space-x-2 mt-2">
+                          <InteractiveStarRating
+                            rating={userNoteRatings[note._id] || 0}
+                            size="md"
+                            onRatingChange={(rating) => handleNoteRatingChange(note._id, rating)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            Avg: {noteRatings[note._id]?.averageRating?.toFixed(2) || "0.00"} ({noteRatings[note._id]?.totalRatings || 0} ratings)
                           </span>
-                          <span>{note.fileSize}</span>
-                          <div className="flex items-center space-x-1">
-                            <User className="h-3 w-3" />
-                            <span>{userNames[note.uploadedBy?._id] || "Unknown"}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{note.uploadDate}</span>
-                          </div>
+                          {ratingLoading[note._id] && <span className="text-xs text-blue-500 ml-2">.</span>}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex flex-col items-end space-y-2">
-                      <div className="flex space-x-2">
-                        <div className="relative group">
-                          <Button
-                            onClick={() => isPreviewSupported(note.fileFormat) && handleView(note)}
-                            variant="outline"
-                            size="sm"
-                            disabled={!isPreviewSupported(note.fileFormat)}
-                            className={`flex items-center space-x-1 border-uninote-blue text-uninote-blue 
-                              ${isPreviewSupported(note.fileFormat) ? 'hover:bg-uninote-blue hover:text-white' : 'cursor-not-allowed opacity-50'}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                            <span>View</span>
-                          </Button>
-
-                          {!isPreviewSupported(note.fileFormat) && (
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded px-1 py-1 opacity-0 group-hover:opacity-40 transition-all duration-300 pointer-events-none">
-                              Preview not supported for this file type
-                            </div>
-                          )}
-                        </div>
-
-                        <Button
-                          onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
-                          size="sm"
-                          className="flex items-center space-x-1 bg-gradient-to-r from-uninote-blue to-uninote-purple hover:from-uninote-purple hover:to-uninote-blue"
-                        >
-                          <Download className="h-4 w-4" />
-                          <span>Download</span>
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center space-x-2 mt-2">
-                        <InteractiveStarRating
-                          rating={userNoteRatings[note._id] || 0}
-                          size="md"
-                          onRatingChange={(rating) => handleNoteRatingChange(note._id, rating)}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          Avg: {noteRatings[note._id]?.averageRating?.toFixed(2) || "0.00"} ({noteRatings[note._id]?.totalRatings || 0} ratings)
-                        </span>
-                        {ratingLoading[note._id] && <span className="text-xs text-blue-500 ml-2">.</span>}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : !loading && !error ? (
-          <div className="text-center py-12 sm:py-16 px-4">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
-              <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
+                    </div >
+                  </CardContent >
+                </Card >
+              ))}
+            </div >
+          ) : !loading && !error ? (
+            <div className="text-center py-12 sm:py-16 px-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+                <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">No Notes Found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
+                {searchQuery
+                  ? `No notes match your search for "${searchQuery}"`
+                  : "No notes have been uploaded for this subject yet. Check back later!"}
+              </p>
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">No Notes Found</h3>
-            <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
-              {searchQuery
-                ? `No notes match your search for "${searchQuery}"`
-                : "No notes have been uploaded for this subject yet. Check back later!"}
-            </p>
-          </div>
-        ) : null}
+          ) : null}
 
         {/* Comments Section - Mobile Responsive */}
         <div className="mt-8 sm:mt-12 max-w-3xl mx-auto px-2 sm:px-0">
@@ -719,8 +731,8 @@ const SubjectView = () => {
             </>
           )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

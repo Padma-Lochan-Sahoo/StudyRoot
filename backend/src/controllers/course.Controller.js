@@ -14,11 +14,30 @@ export const getAllCourses = async (req, res) => {
 //  Create a new course
 export const createCourse = async (req, res) => {
   try {
-    const course = new Course(req.body);
-    await course.save();
-    res.status(201).json(course);
+    const { name, totalSemesters } = req.body;
+
+    // Basic validation
+    if (!name || !totalSemesters) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check for duplicate course name
+    const existingCourse = await Course.findOne({ name });
+    if (existingCourse) {
+      return res.status(400).json({ message: "Course already exists" });
+    }
+
+    const newCourse = new Course({
+      name,
+      totalSemesters,
+    });
+
+    await newCourse.save();
+
+    res.status(201).json({ message: "Course created successfully", course: newCourse });
   } catch (error) {
-    res.status(400).json({ message: 'Error creating course', error });
+    console.error("Error creating course:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

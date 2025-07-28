@@ -69,7 +69,7 @@ const StatsCard = () => {
         return (
           <Card
             key={index}
-            className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <CardContent className="p-6 text-center">
               <div
@@ -77,10 +77,10 @@ const StatsCard = () => {
               >
                 <IconComponent className="h-6 w-6 text-white" />
               </div>
-              <div className="text-3xl font-bold text-gray-800 mb-1">
+              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">
                 {stat.value}
               </div>
-              <div className="text-gray-600 font-medium">{stat.label}</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
             </CardContent>
           </Card>
         );
