@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useThemeStore } from "@/store/useThemeStore";
 
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
@@ -29,7 +30,7 @@ const App = () => {
   const navigate = useNavigate();
 
   const DASHBOARD_ROLES = ["admin", "user"];
-const ADMIN_ONLY = ["admin"];
+  const ADMIN_ONLY = ["admin"];
 
 
   // Check auth when app mounts
@@ -37,18 +38,24 @@ const ADMIN_ONLY = ["admin"];
     checkAuth();
   }, []);
 
+  // Ensure dark class is set on mount and when theme changes
+  const { theme } = useThemeStore();
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
 
   console.log({ authUser });
 
 
 
   // While checking auth, show loading screen
-  if(isCheckingAuth && !authUser){
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader className="size-10 animate-spin"/>
-    </div>
-  )
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -57,97 +64,97 @@ const ADMIN_ONLY = ["admin"];
         <Toaster />
         <Sonner />
         <HotToaster />
-<Routes>
-  <Route
-  path="/"
-  element={
-    authUser ? (
-      authUser.role === "admin" ? (
-        <Navigate to="/admin" />
-      ) : (
-        <Navigate to="/dashboard" />
-      )
-    ) : (
-      <Index />
-    )
-  }
-/>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              authUser ? (
+                authUser.role === "admin" ? (
+                  <Navigate to="/admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              ) : (
+                <Index />
+              )
+            }
+          />
 
-<Route
-  path="/auth"
-  element={
-    authUser ? (
-      authUser.role === "admin" ? (
-        <Navigate to="/admin" />
-      ) : (
-        <Navigate to="/dashboard" />
-      )
-    ) : (
-      <Login />
-    )
-  }
-/>
-
-
+          <Route
+            path="/auth"
+            element={
+              authUser ? (
+                authUser.role === "admin" ? (
+                  <Navigate to="/admin" />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )
+              ) : (
+                <Login />
+              )
+            }
+          />
 
 
-  {/* Only for non-admin users */}
-  <Route
-    path="/dashboard"
-    element={
-      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-        <Dashboard />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/dashboard/:course"
-    element={
-      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-        <CourseView />
-      </ProtectedRoute>
-    }
-  />
-<Route
-  path="/dashboard/:course/semester/:semester"
-  element={
-    <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-      <SemesterView />
-    </ProtectedRoute>
-  }
-/>
 
-  <Route
-    path="/dashboard/:course/:semester/:subject"
-    element={
-      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-        <SubjectView />
-      </ProtectedRoute>
-    }
-  />
 
-  {/* Profile route for all authenticated users */}
-  <Route
-    path="/profile"
-    element={
-      <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-        <Profile />
-      </ProtectedRoute>
-    }
-  />
+          {/* Only for non-admin users */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/:course"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <CourseView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/:course/semester/:semester"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <SemesterView />
+              </ProtectedRoute>
+            }
+          />
 
-  {/* Only for admins */}
-  <Route
-    path="/admin"
-    element={
-      <ProtectedRoute allowedRoles={ADMIN_ONLY}>
-        <AdminPanel />
-      </ProtectedRoute>
-    }
-  />
+          <Route
+            path="/dashboard/:course/:semester/:subject"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <SubjectView />
+              </ProtectedRoute>
+            }
+          />
 
-  <Route path="*" element={<NotFound />} />
-</Routes>
+          {/* Profile route for all authenticated users */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Only for admins */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={ADMIN_ONLY}>
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
 
       </TooltipProvider>
     </QueryClientProvider>

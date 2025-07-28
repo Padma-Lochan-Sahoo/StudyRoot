@@ -35,7 +35,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
 
   const handleUpdate = async () => {
     if (!hasChanges) return;
-    
+
     setIsLoading(true);
     try {
       const form = new FormData();
@@ -49,9 +49,9 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
       });
 
       onUpdate(res.data.note);
-      
-      toast({ 
-        title: "Success", 
+
+      toast({
+        title: "Success",
         description: "Note updated successfully",
         className: "bg-green-50 border-green-200"
       });
@@ -80,14 +80,14 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
               <FileText className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-800">Edit Note</h2>
+            <h2 className="text-xl font-semibold text-foreground">Edit Note</h2>
           </div>
           <Button
             variant="ghost"
@@ -103,7 +103,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
         <div className="p-6 space-y-6">
           {/* Title Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Note Title
             </label>
             <Input
@@ -111,22 +111,22 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter note title"
-              className="w-full h-12 px-4 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-blue-500 text-gray-800"
+              className="w-full h-12 px-4 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-blue-500 text-foreground"
             />
           </div>
 
           {/* File Upload */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Update File (Optional)
             </label>
-            
+
             {/* Current File Info */}
             {note?.filename && !file && (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="p-4 bg-muted rounded-xl border border-gray-200">
                 <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600 truncate">
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground truncate">
                     Current: {note.filename}
                   </span>
                 </div>
@@ -165,7 +165,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
                 className="w-full h-12 px-4 border-gray-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-gradient-to-r file:from-blue-500 file:to-purple-500 file:text-white hover:file:from-blue-600 hover:file:to-purple-600"
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Supported formats: PDF, DOC, DOCX, PPT, PPTX
             </p>
           </div>
@@ -176,7 +176,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
           <Button
             variant="outline"
             onClick={onClose}
-            className="w-full sm:w-auto h-12 px-6 border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-medium"
+            className="w-full sm:w-auto h-12 px-6 border-gray-200 hover:bg-gray-50 text-muted-foreground rounded-xl font-medium"
             disabled={isLoading}
           >
             Cancel
@@ -184,11 +184,10 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ note, onClose, onUpdate }
           <Button
             onClick={handleUpdate}
             disabled={!hasChanges || isLoading || !title.trim()}
-            className={`w-full sm:w-auto h-12 px-8 rounded-xl font-medium transition-all duration-200 ${
-              hasChanges && title.trim() && !isLoading
+            className={`w-full sm:w-auto h-12 px-8 rounded-xl font-medium transition-all duration-200 ${hasChanges && title.trim() && !isLoading
                 ? "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
+                : "bg-gray-200 text-muted-foreground cursor-not-allowed"
+              }`}
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">

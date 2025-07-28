@@ -37,11 +37,11 @@ const ManageUsersSection = () => {
 
   const makeAdmin = async () => {
     if (!selectedUser) return;
-    
+
     try {
       await axios.put(`/profile/make-admin/${selectedUser._id}`);
-      toast({ 
-        title: "Success", 
+      toast({
+        title: "Success",
         description: `${selectedUser.fullName} has been promoted to admin!`,
       });
       fetchUsers();
@@ -74,7 +74,7 @@ const ManageUsersSection = () => {
     <>
       <div className="w-full max-w-6xl mx-auto space-y-6 p-4 sm:p-6">
         {/* Header */}
-        <div className="bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-6 sm:p-8 shadow-lg">
+        <div className="bg-card/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-6 sm:p-8 shadow-lg">
           <div className="flex items-center space-x-4 mb-2">
             <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl shadow-lg">
               <User className="h-6 w-6 text-white" />
@@ -83,12 +83,12 @@ const ManageUsersSection = () => {
               <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                 Manage Users
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base mt-1">
+              <p className="text-muted-foreground text-sm sm:text-base mt-1">
                 View and manage user permissions
               </p>
             </div>
           </div>
-          
+
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
             <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 p-4 rounded-xl border border-blue-200/50">
@@ -112,21 +112,21 @@ const ManageUsersSection = () => {
 
         {/* Users List */}
         {loading ? (
-          <div className="bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-8 shadow-lg text-center">
+          <div className="bg-card/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-8 shadow-lg text-center">
             <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading users...</p>
+            <p className="text-muted-foreground">Loading users...</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-8 shadow-lg text-center">
-            <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No users found</p>
+          <div className="bg-card/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-8 shadow-lg text-center">
+            <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No users found</p>
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {users.map((user) => (
               <Card
                 key={user._id}
-                className="bg-white/95 backdrop-blur-xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="bg-card/95 backdrop-blur-xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
@@ -137,11 +137,11 @@ const ManageUsersSection = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-base sm:text-lg font-bold text-gray-800 truncate pr-2">
+                          <h3 className="text-base sm:text-lg font-bold text-foreground truncate pr-2">
                             {user.fullName}
                           </h3>
                         </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <Mail className="h-4 w-4 shrink-0" />
                           <span className="truncate">{user.email}</span>
                         </div>
@@ -193,19 +193,19 @@ const ManageUsersSection = () => {
       {/* Confirmation Dialog */}
       {showConfirmDialog && selectedUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-white w-full max-w-md mx-auto shadow-2xl border-0">
+          <Card className="bg-card/95 w-full max-w-md mx-auto shadow-2xl border-0">
             <CardContent className="p-6">
               <div className="flex items-start space-x-4 mb-6">
                 <div className="bg-gradient-to-r from-yellow-100 to-orange-100 p-3 rounded-full">
                   <AlertTriangle className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  <h3 className="text-lg font-bold text-foreground mb-2">
                     Confirm Admin Promotion
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     Are you sure you want to promote{" "}
-                    <span className="font-semibold text-gray-800">{selectedUser.fullName}</span> to admin?
+                    <span className="font-semibold text-foreground">{selectedUser.fullName}</span> to admin?
                     This action will give them administrative privileges.
                   </p>
                 </div>

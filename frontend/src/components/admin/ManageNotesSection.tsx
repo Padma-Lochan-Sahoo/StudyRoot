@@ -17,13 +17,13 @@ const ManageNotesSection: React.FC<ManageNotesSectionProps> = ({
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+        <h1 className="text-3xl font-bold text-foreground mb-4">
           Manage{" "}
           <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
             Notes
           </span>
         </h1>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           View and manage all uploaded study materials.
         </p>
       </div>

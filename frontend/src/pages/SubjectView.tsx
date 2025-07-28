@@ -15,6 +15,7 @@ import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/useAuthStore";
 import axios from "@/lib/axiosInstance";
 import { formatDistanceToNow } from "date-fns";
+import InteractiveStarRating from "@/components/InteractiveStarRating";
 
 const SubjectView = () => {
   const { course, semester, subject } = useParams();
@@ -303,8 +304,70 @@ const SubjectView = () => {
       });
   };
 
+  const [noteRatings, setNoteRatings] = useState<{ [noteId: string]: { averageRating: number; totalRatings: number } }>({});
+  const [userNoteRatings, setUserNoteRatings] = useState<{ [noteId: string]: number }>({});
+  const [ratingLoading, setRatingLoading] = useState<{ [noteId: string]: boolean }>({});
+
+  // Fetch ratings for notes after notes are loaded
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const ratings: { [noteId: string]: { averageRating: number; totalRatings: number } } = {};
+      const userRatings: { [noteId: string]: number } = {};
+      await Promise.all(
+        notes.map(async (note) => {
+          try {
+            const avgRes = await axios.get(`/note-ratings/note/${note._id}`);
+            ratings[note._id] = {
+              averageRating: avgRes.data.averageRating || 0,
+              totalRatings: avgRes.data.totalRatings || 0,
+            };
+          } catch {
+            ratings[note._id] = { averageRating: 0, totalRatings: 0 };
+          }
+          if (authUser) {
+            try {
+              const userRes = await axios.get(`/note-ratings/note/${note._id}/user`);
+              userRatings[note._id] = userRes.data.rating || 0;
+            } catch {
+              userRatings[note._id] = 0;
+            }
+          }
+        })
+      );
+      setNoteRatings(ratings);
+      setUserNoteRatings(userRatings);
+    };
+    if (notes.length > 0) fetchRatings();
+  }, [notes, authUser]);
+
+  const handleNoteRatingChange = async (noteId: string, rating: number) => {
+    if (!authUser) {
+      toast.error("Please log in to rate notes.");
+      return;
+    }
+    setRatingLoading((prev) => ({ ...prev, [noteId]: true }));
+    try {
+      await axios.post(`/note-ratings/note/${noteId}`, { rating });
+      setUserNoteRatings((prev) => ({ ...prev, [noteId]: rating }));
+      // Refetch average rating
+      const avgRes = await axios.get(`/note-ratings/note/${noteId}`);
+      setNoteRatings((prev) => ({
+        ...prev,
+        [noteId]: {
+          averageRating: avgRes.data.averageRating || 0,
+          totalRatings: avgRes.data.totalRatings || 0,
+        },
+      }));
+      toast.success("Rating submitted!");
+    } catch (err) {
+      toast.error("Failed to submit rating.");
+    } finally {
+      setRatingLoading((prev) => ({ ...prev, [noteId]: false }));
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background dark:bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       {/* Breadcrumbs - Mobile Responsive */}
@@ -312,7 +375,7 @@ const SubjectView = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
         <nav className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground overflow-x-auto">
           <Link to="/dashboard" className="flex items-center hover:text-primary whitespace-nowrap">
-            <Home className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> 
+            <Home className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             <span className="hidden sm:inline">Dashboard</span>
             <span className="sm:hidden">Home</span>
           </Link>
@@ -333,26 +396,26 @@ const SubjectView = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pb-8 sm:pb-12">
         {/* Header - Mobile Responsive */}
-          <div className="text-center mb-6 sm:mb-8 px-2 sm:px-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 break-words dark:text-foreground">
-              {subjectName} <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">Notes</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-2 sm:px-0 dark:text-muted-foreground">
-              Download verified study materials and notes for {subjectName}.
-            </p>
-          </div>
+        <div className="text-center mb-6 sm:mb-8 px-2 sm:px-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4 break-words dark:text-foreground">
+            {subjectName} <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">Notes</span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-2 sm:px-0 dark:text-muted-foreground">
+            Download verified study materials and notes for {subjectName}.
+          </p>
+        </div>
 
         {/* Search - Mobile Responsive */}
-          <div className="max-w-md mx-auto mb-6 sm:mb-8 px-2 sm:px-0">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search notes..."
-                className="pl-10 h-10 sm:h-12 bg-background border-border focus:border-primary rounded-xl text-sm sm:text-base dark:bg-background dark:border-foreground dark:focus:border-primary"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        <div className="max-w-md mx-auto mb-6 sm:mb-8 px-2 sm:px-0">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search notes..."
+              className="pl-10 h-10 sm:h-12 bg-background border-border focus:border-primary rounded-xl text-sm sm:text-base dark:bg-background dark:border-foreground dark:focus:border-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
@@ -370,7 +433,7 @@ const SubjectView = () => {
             {filteredNotes.map((note) => (
               <Card
                 key={note._id}
-                className={`bg-white/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.fileFormat)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
+                className={`bg-card/80 backdrop-blur-sm border-l-4 ${getFileTypeColor(note.fileFormat)} shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-2px]`}
               >
                 <CardContent className="p-3 sm:p-4 md:p-6">
                   {/* Mobile Layout */}
@@ -380,14 +443,14 @@ const SubjectView = () => {
                         <FileText className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-gray-800 mb-2 break-words">{note.title}</h3>
-                        <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
-                          <span className="bg-gray-100 px-2 py-1 rounded-full font-medium">
+                        <h3 className="text-base font-bold text-foreground mb-2 break-words">{note.title}</h3>
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
+                          <span className="bg-muted px-2 py-1 rounded-full font-medium">
                             {note.fileFormat}
                           </span>
-                          <span className="bg-gray-100 px-2 py-1 rounded-full">{note.fileSize}</span>
+                          <span className="bg-muted px-2 py-1 rounded-full">{note.fileSize}</span>
                         </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
                           <div className="flex items-center space-x-1">
                             <User className="h-3 w-3" />
                             <span className="truncate max-w-[120px]">{userNames[note.uploadedBy?._id] || "Unknown"}</span>
@@ -397,14 +460,9 @@ const SubjectView = () => {
                             <span>{note.uploadDate}</span>
                           </div>
                         </div>
-                        <StarRating
-                          rating={note.rating || 0}
-                          totalRatings={note.totalRatings || 0}
-                          size="sm"
-                        />
                       </div>
                     </div>
-                    
+
                     {/* Mobile Action Buttons */}
                     <div className="flex flex-col space-y-2">
                       <div className="flex space-x-2">
@@ -421,7 +479,7 @@ const SubjectView = () => {
                             <span>View</span>
                           </Button>
                         </div>
-                        
+
                         <div className="flex-1">
                           <Button
                             onClick={() => handleDownload(note._id, note.title, note.fileFormat)}
@@ -433,8 +491,8 @@ const SubjectView = () => {
                           </Button>
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between text-xs text-gray-500 font-medium px-2">
+
+                      <div className="flex justify-between text-xs text-muted-foreground font-medium px-2">
                         <div>Views: {note.views?.toLocaleString() || 0}</div>
                         <div>Downloads: {note.downloads.toLocaleString()}</div>
                       </div>
@@ -449,9 +507,9 @@ const SubjectView = () => {
                       </div>
 
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">{note.title}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-                          <span className="bg-gray-100 px-2 py-1 rounded-full font-medium">
+                        <h3 className="text-lg font-bold text-foreground mb-2">{note.title}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
+                          <span className="bg-muted px-2 py-1 rounded-full font-medium">
                             {note.fileFormat}
                           </span>
                           <span>{note.fileSize}</span>
@@ -464,11 +522,6 @@ const SubjectView = () => {
                             <span>{note.uploadDate}</span>
                           </div>
                         </div>
-                        <StarRating
-                          rating={note.rating || 0}
-                          totalRatings={note.totalRatings || 0}
-                          size="sm"
-                        />
                       </div>
                     </div>
 
@@ -503,10 +556,17 @@ const SubjectView = () => {
                           <span>Download</span>
                         </Button>
                       </div>
-                      
-                      <div className="flex items-center space-x-4 md:space-x-14 text-xs text-gray-500 font-medium">
-                        <div>Views: {note.views?.toLocaleString() || 0}</div>
-                        <div>Downloads: {note.downloads.toLocaleString()}</div>
+
+                      <div className="flex items-center space-x-2 mt-2">
+                        <InteractiveStarRating
+                          rating={userNoteRatings[note._id] || 0}
+                          size="md"
+                          onRatingChange={(rating) => handleNoteRatingChange(note._id, rating)}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          Avg: {noteRatings[note._id]?.averageRating?.toFixed(2) || "0.00"} ({noteRatings[note._id]?.totalRatings || 0} ratings)
+                        </span>
+                        {ratingLoading[note._id] && <span className="text-xs text-blue-500 ml-2">.</span>}
                       </div>
                     </div>
                   </div>
@@ -519,8 +579,8 @@ const SubjectView = () => {
             <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
               <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">No Notes Found</h3>
-            <p className="text-gray-600 max-w-md mx-auto text-sm sm:text-base">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">No Notes Found</h3>
+            <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
               {searchQuery
                 ? `No notes match your search for "${searchQuery}"`
                 : "No notes have been uploaded for this subject yet. Check back later!"}
@@ -532,16 +592,15 @@ const SubjectView = () => {
         <div className="mt-8 sm:mt-12 max-w-3xl mx-auto px-2 sm:px-0">
           <button
             onClick={() => setCommentsVisible(!commentsVisible)}
-            className="flex items-center space-x-2 text-xl sm:text-2xl font-semibold mb-4 text-gray-800 focus:outline-none"
+            className="flex items-center space-x-2 text-xl sm:text-2xl font-semibold mb-4 text-foreground focus:outline-none"
             aria-expanded={commentsVisible}
             aria-controls="comments-section"
           >
             <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-uninote-blue" />
             <span>Comments</span>
             <svg
-              className={`w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform duration-300 ${
-                commentsVisible ? "transform rotate-180" : ""
-              }`}
+              className={`w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform duration-300 ${commentsVisible ? "transform rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -566,34 +625,33 @@ const SubjectView = () => {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         rows={3}
-                        className="w-full rounded-lg border border-gray-300 p-3 resize-none focus:outline-none focus:ring-2 focus:ring-uninote-blue text-sm sm:text-base"
+                        className="w-full rounded-lg border border-border p-3 resize-none focus:outline-none focus:ring-2 focus:ring-uninote-blue text-sm sm:text-base"
                       />
                       <div className="flex justify-end mt-2">
                         <Button
                           onClick={handlePostComment}
                           disabled={!newComment.trim() || postingComment}
-                          className={`bg-uninote-blue text-white hover:bg-uninote-purple text-sm sm:text-base ${
-                            postingComment ? "opacity-50 cursor-wait" : ""
-                          }`}
+                          className={`bg-uninote-blue text-white hover:bg-uninote-purple text-sm sm:text-base ${postingComment ? "opacity-50 cursor-wait" : ""
+                            }`}
                         >
                           {postingComment ? "Posting..." : "Post Comment"}
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-center text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base px-4">
+                    <p className="text-center text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base px-4">
                       Please log in to post comments.
                     </p>
                   )}
 
                   {comments.length === 0 ? (
-                    <p className="text-center text-gray-600 text-sm sm:text-base px-4">No comments yet. Be the first to comment!</p>
+                    <p className="text-center text-muted-foreground text-sm sm:text-base px-4">No comments yet. Be the first to comment!</p>
                   ) : (
                     <div className="space-y-3 sm:space-y-4">
                       {comments.map((comment) => (
                         <Card
                           key={comment._id}
-                          className="bg-white/80 backdrop-blur-sm border-l-4 border-uninote-blue shadow-md"
+                          className="bg-card/80 backdrop-blur-sm border-l-4 border-uninote-blue shadow-md"
                         >
                           <CardContent className="p-3 sm:p-4">
                             <div className="flex items-start space-x-3 sm:space-x-4">
@@ -604,20 +662,19 @@ const SubjectView = () => {
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between mb-1">
-                                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate pr-2">{comment.user.fullName}</h3>
-                                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  <h3 className="font-semibold text-foreground text-sm sm:text-base truncate pr-2">{comment.user.fullName}</h3>
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                                   </span>
                                 </div>
-                                <p className="mt-1 text-gray-700 whitespace-pre-wrap text-sm sm:text-base break-words">{comment.content}</p>
-                                <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs sm:text-sm text-gray-600">
+                                <p className="mt-1 text-foreground whitespace-pre-wrap text-sm sm:text-base break-words">{comment.content}</p>
+                                <div className="flex items-center space-x-3 sm:space-x-4 mt-2 text-xs sm:text-sm text-muted-foreground">
                                   <button
                                     onClick={() => handleLikeComment(comment._id)}
-                                    className={`flex items-center space-x-1 ${
-                                      comment.likedByUser
-                                        ? "text-red-600 fill-red-600"
-                                        : "text-gray-600 hover:text-red-600"
-                                    } transition-colors duration-300`}
+                                    className={`flex items-center space-x-1 ${comment.likedByUser
+                                      ? "text-red-600 fill-red-600"
+                                      : "text-muted-foreground hover:text-red-600"
+                                      } transition-colors duration-300`}
                                     aria-label="Like comment"
                                   >
                                     <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -626,9 +683,8 @@ const SubjectView = () => {
                                   {authUser && authUser._id === comment.user._id && (
                                     <button
                                       onClick={() => handleDeleteComment(comment._id)}
-                                      className={`flex items-center space-x-1 text-red-500 hover:text-red-700 ${
-                                        deletingCommentId === comment._id ? "opacity-50 cursor-wait" : ""
-                                      }`}
+                                      className={`flex items-center space-x-1 text-red-500 hover:text-red-700 ${deletingCommentId === comment._id ? "opacity-50 cursor-wait" : ""
+                                        }`}
                                       aria-label="Delete comment"
                                       disabled={deletingCommentId === comment._id}
                                     >
@@ -651,9 +707,8 @@ const SubjectView = () => {
                       <Button
                         key={pageNum}
                         onClick={() => setCommentsPage(pageNum)}
-                        className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap ${
-                          commentsPage === pageNum ? "bg-uninote-blue text-white" : "bg-gray-200 text-gray-700"
-                        }`}
+                        className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm whitespace-nowrap ${commentsPage === pageNum ? "bg-uninote-blue text-white" : "bg-muted text-muted-foreground"
+                          }`}
                       >
                         {pageNum}
                       </Button>

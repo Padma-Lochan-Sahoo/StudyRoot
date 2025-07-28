@@ -64,19 +64,19 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-uninote-light via-white to-blue-50">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Welcome to Your{" "}
             <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent">
               Study Hub
             </span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Choose your course to access semester-wise notes and study
             materials. Everything you need for academic success, organized and
             ready to download.
@@ -86,29 +86,29 @@ const Dashboard = () => {
         {/* Course Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {courses.map((course) => {
-const metaKey = Object.keys(courseMeta).find(key => course.name.startsWith(key));
+            const metaKey = Object.keys(courseMeta).find(key => course.name.startsWith(key));
 
-const meta = courseMeta[metaKey] || courseMeta.others; 
-const IconComponent = meta.icon || GraduationCap;
-const color = meta.color || "from-gray-500 to-slate-500";
+            const meta = courseMeta[metaKey] || courseMeta.others;
+            const IconComponent = meta.icon || GraduationCap;
+            const color = meta.color || "from-gray-500 to-slate-500";
 
             return (
               <Card
                 key={course._id}
-                className="group bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-onClick={() => navigate(`/dashboard/${course._id}`)}
+                className="group bg-card/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                onClick={() => navigate(`/dashboard/${course._id}`)}
               >
                 <CardHeader className="text-center pb-4">
                   <div
                     className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                   >
-                    <IconComponent className="h-8 w-8 text-white" />
+                    <IconComponent className="h-8 w-8 text-foreground" />
                   </div>
-                  <CardTitle className="text-2xl font-bold text-gray-800 group-hover:text-uninote-blue transition-colors">
+                  <CardTitle className="text-2xl font-bold text-foreground group-hover:text-uninote-blue transition-colors">
                     {course.name}
                   </CardTitle>
 
-                  <div className="text-sm text-gray-500 mt-2">
+                  <div className="text-sm text-muted-foreground mt-2">
                     {course.totalSemesters} Semesters
                   </div>
                 </CardHeader>

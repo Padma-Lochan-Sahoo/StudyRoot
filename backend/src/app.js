@@ -25,10 +25,13 @@ import courseRoute from "./routes/courseRoutes.js";
 import semesterRoute from "./routes/semesterRoutes.js";
 import subjectRoute from "./routes/subjectRoutes.js";
 import noteRoute from "./routes/noteRoutes.js";
+import noteRatingRoute from "./routes/ratingRoutes.js";
 
 import profileRoute from "./routes/profileRoutes.js";
 import dashboardRoute from "./routes/dashboardRoutes.js";
+
 import commentRoute from "./routes/commentRoutes.js";
+import ratingRoute from "./routes/ratingRoutes.js";
 
 // routes declaration
 app.use("/api/auth", authRoute);
@@ -38,6 +41,9 @@ app.use("/api/subjects", subjectRoute);
 // app.use("/api/notes", noteRoute);
 app.use("/api/notes", noteRoute);
 app.use("/api/comments", commentRoute);
+
+app.use("/api/ratings", ratingRoute);
+app.use("/api/note-ratings", noteRatingRoute);
 
 app.use("/api/profile", profileRoute);
 app.use("/api/dashboard", dashboardRoute);

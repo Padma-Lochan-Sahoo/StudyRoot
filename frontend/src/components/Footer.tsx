@@ -18,7 +18,7 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="relative bg-uninote-dark text-white overflow-hidden">
+    <footer className="relative bg-background text-foreground overflow-hidden">
       <div
         className="absolute inset-0 opacity-20 transition-transform duration-200 pointer-events-none"
         style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
@@ -45,7 +45,7 @@ const Footer = () => {
                 StudyRoot
               </span>
             </div>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed">
               Your one-stop hub for university notes and study materials.
               Helping students excel in their academic journey.
             </p>
@@ -55,14 +55,14 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#features" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
-              <li><a href="#about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="/auth" className="text-gray-400 hover:text-white transition-colors">Courses</a></li>
+              <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
+              <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
+              <li><a href="/auth" className="text-muted-foreground hover:text-foreground transition-colors">Courses</a></li>
             </ul>
           </div>
 
           {/* Legal */}
-      
+
 
           {/* Contact */}
           <div className="space-y-4">
@@ -70,67 +70,67 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-uninote-blue" />
-                <span className="text-gray-400">studyroot18@gmail.com</span>
+                <span className="text-muted-foreground">studyroot18@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-uninote-blue" />
-                <span className="text-gray-400">+91 7606957399</span>
+                <span className="text-muted-foreground">+91 7606957399</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-uninote-blue" />
-                <span className="text-gray-400">GIET University ,GUNUPUR</span>
+                <span className="text-muted-foreground">GIET University ,GUNUPUR</span>
               </div>
             </div>
           </div>
           <div className="mt-0">
-          <h3 className="text-lg font-semibold mb-4">Developed By</h3>
-          <ul className="space-y-3 text-gray-400 text-sm">
-            <li>
-              <a
-                href="https://www.linkedin.com/in/padma-lochan-sahoo?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors flex items-center space-x-2"
-              >
-                <GraduationCap className="h-4 w-4 text-uninote-blue" />
-                <span>Padma Lochan Sahoo - GIET University, Gunupur</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://www.linkedin.com/in/saikatbahadur?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors flex items-center space-x-2"
-              >
-                <GraduationCap className="h-4 w-4 text-uninote-blue" />
-                <span>Saikat Bahadur - GIET University, Gunupur</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://www.linkedin.com/in/sandeep-pati-537ba030b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors flex items-center space-x-2"
-              >
-                <GraduationCap className="h-4 w-4 text-uninote-blue" />
-                <span>Sandeep Pati - GIET University, Gunupur</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+            <h3 className="text-lg font-semibold mb-4">Developed By</h3>
+            <ul className="space-y-3 text-muted-foreground text-sm">
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/padma-lochan-sahoo?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors flex items-center space-x-2"
+                >
+                  <GraduationCap className="h-4 w-4 text-uninote-blue" />
+                  <span>Padma Lochan Sahoo - GIET University, Gunupur</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/saikatbahadur?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors flex items-center space-x-2"
+                >
+                  <GraduationCap className="h-4 w-4 text-uninote-blue" />
+                  <span>Saikat Bahadur - GIET University, Gunupur</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/sandeep-pati-537ba030b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors flex items-center space-x-2"
+                >
+                  <GraduationCap className="h-4 w-4 text-uninote-blue" />
+                  <span>Sandeep Pati - GIET University, Gunupur</span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Developer Info Section */}
-        
+
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             © 2025 StudyRoot. All rights reserved.
           </p>
-      
+
         </div>
       </div>
     </footer>

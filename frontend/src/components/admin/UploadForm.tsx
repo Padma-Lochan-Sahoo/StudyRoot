@@ -48,20 +48,20 @@ const UploadForm: React.FC<UploadFormProps> = ({
 }) => {
   return (
     <div className="w-full max-w-2xl">
-      <h1 className="text-3xl font-bold text-gray-800 mb-1">
+      <h1 className="text-3xl font-bold text-foreground mb-1">
         Upload <span className="text-uninote-purple">Notes</span>
       </h1>
-      <p className="text-gray-500 mb-6">
+      <p className="text-muted-foreground mb-6">
         Upload verified study materials for students to access.
       </p>
 
-      <Card className="bg-white shadow-lg rounded-xl border border-gray-100">
+      <Card className="bg-card shadow-lg rounded-xl border border-muted">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-gray-800">
+          <CardTitle className="flex items-center space-x-2 text-xl font-semibold text-foreground">
             <Plus className="h-5 w-5" />
             <span>Add New Note</span>
           </CardTitle>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Fill in the details below to upload a new study material.
           </p>
         </CardHeader>
@@ -135,7 +135,7 @@ const UploadForm: React.FC<UploadFormProps> = ({
               />
             </div>
 
-            <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="border border-dashed border-muted-foreground rounded-lg p-6 text-center">
               <Label className="block mb-2">Upload File</Label>
               <Input
                 type="file"
@@ -144,7 +144,7 @@ const UploadForm: React.FC<UploadFormProps> = ({
                 required
                 className="file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
               />
-              <p className="left-0 mt-2 text-sm text-gray-500">
+              <p className="left-0 mt-2 text-sm text-muted-foreground">
                 Supported formats: PDF, DOC, DOCX (Max size: 10MB)
               </p>
             </div>

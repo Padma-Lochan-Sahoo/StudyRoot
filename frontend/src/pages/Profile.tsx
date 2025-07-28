@@ -10,14 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  User, 
-  GraduationCap, 
-  Shield, 
-  Trash2, 
-  Camera, 
-  Save, 
-  Edit, 
+import {
+  User,
+  GraduationCap,
+  Shield,
+  Trash2,
+  Camera,
+  Save,
+  Edit,
   X,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -67,7 +67,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { authUser, logout } = useAuthStore();
   const { toast } = useToast();
-  
+
   // State management
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -127,7 +127,7 @@ const Profile = () => {
       const response = await axios.get("/profile");
       const userProfile = response.data.data;
       setProfile(userProfile);
-      
+
       // Populate form data from the fetched profile
       setFormData({
         fullName: userProfile.fullName || "",
@@ -163,7 +163,7 @@ const Profile = () => {
     }
   };
 
-  
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -284,8 +284,8 @@ const Profile = () => {
   // Loading state UI
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navbar/>
+      <div className="min-h-screen bg-background">
+        <Navbar />
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-uninote-blue"></div>
         </div>
@@ -296,11 +296,11 @@ const Profile = () => {
   // Profile not found state UI
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navbar/>
+      <div className="min-h-screen bg-background">
+        <Navbar />
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Not Found</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Profile Not Found</h2>
             <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
           </div>
         </div>
@@ -310,9 +310,9 @@ const Profile = () => {
 
   // Main component render
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
         <Card className="mb-8 overflow-hidden">
@@ -334,8 +334,8 @@ const Profile = () => {
                 )}
 
                 {!isUploadingPicture && (
-                  <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                    <Camera className="h-4 w-4 text-gray-600" />
+                  <label className="absolute bottom-0 right-0 bg-card rounded-full p-2 shadow-lg cursor-pointer hover:bg-muted-foreground transition-colors">
+                    <Camera className="h-4 w-4 text-muted-foreground" />
                     <input
                       type="file"
                       accept="image/*"
@@ -345,29 +345,29 @@ const Profile = () => {
                   </label>
                 )}
               </div>
-              
+
               {/* Profile Info and Completion */}
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">{profile.fullName}</h1>
-                <p className="text-gray-600 mt-1">{profile.email}</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{profile.fullName}</h1>
+                <p className="text-muted-foreground mt-1">{profile.email}</p>
                 <div className="flex items-center justify-center sm:justify-start space-x-4 mt-2">
                   <Badge variant={profile.role === "admin" ? "default" : "secondary"}>
                     {profile.role}
                   </Badge>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     Member since {new Date(profile.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                
+
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">Profile Completion</span>
+                    <span className="text-sm font-medium text-foreground">Profile Completion</span>
                     <span className="text-sm font-medium text-uninote-blue">{profile.profileCompletion}%</span>
                   </div>
                   <Progress value={profile.profileCompletion} className="h-2" />
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex space-x-2 mt-4 sm:mt-0">
                 {isEditing ? (
@@ -377,8 +377,8 @@ const Profile = () => {
                       {isSaving ? "Saving..." : "Save"}
                     </Button>
                     <Button variant="outline" onClick={() => setIsEditing(false)}>
-                       <X className="h-4 w-4 mr-2" />
-                       Cancel
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
                     </Button>
                   </>
                 ) : (
@@ -394,47 +394,47 @@ const Profile = () => {
 
         {/* Profile Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-<TabsList
-  className="flex w-full justify-around bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 
+          <TabsList
+            className="flex w-full justify-around bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 
              text-white rounded-xl p-2 shadow-lg backdrop-blur-md"
->
-  <TabsTrigger
-    value="personal"
-    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
-               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
-               hover:bg-white/10"
-  >
-    <User className="h-4 w-4" />
-    <span className="hidden sm:inline">Personal</span>
-  </TabsTrigger>
+          >
+            <TabsTrigger
+              value="personal"
+              className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow
+               hover:bg-muted"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Personal</span>
+            </TabsTrigger>
 
-  <TabsTrigger
-    value="academic"
-    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
-               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
-               hover:bg-white/10"
-  >
-    <GraduationCap className="h-4 w-4" />
-    <span className="hidden sm:inline">Academic</span>
-  </TabsTrigger>
+            <TabsTrigger
+              value="academic"
+              className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow
+               hover:bg-muted"
+            >
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Academic</span>
+            </TabsTrigger>
 
-  <TabsTrigger
-    value="security"
-    className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
-               data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow
-               hover:bg-white/10"
-  >
-    <Shield className="h-4 w-4" />
-    <span className="hidden sm:inline">Security</span>
-  </TabsTrigger>
-</TabsList>
+            <TabsTrigger
+              value="security"
+              className="flex-1 mx-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+               data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow
+               hover:bg-muted"
+            >
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Security</span>
+            </TabsTrigger>
+          </TabsList>
 
 
-<div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent my-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent my-4" />
 
 
           {/* Personal Information Tab */}
-          <TabsContent value="personal" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
+          <TabsContent value="personal" className="mt-6 bg-card/80 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
               <CardHeader>
                 <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Personal Information</CardTitle>
@@ -443,7 +443,7 @@ const Profile = () => {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div><Label htmlFor="fullName">Full Name *</Label><Input id="fullName" value={formData.fullName} onChange={(e) => handleInputChange("fullName", e.target.value)} disabled={!isEditing} /></div>
-                  <div><Label htmlFor="email">Email</Label><Input id="email" value={profile.email} disabled className="bg-gray-100 cursor-not-allowed" /></div>
+                  <div><Label htmlFor="email">Email</Label><Input id="email" value={profile.email} disabled className="bg-muted cursor-not-allowed" /></div>
                   <div><Label htmlFor="phoneNumber">Phone Number</Label><Input id="phoneNumber" value={formData.phoneNumber} onChange={(e) => handleInputChange("phoneNumber", e.target.value)} disabled={!isEditing} /></div>
                   <div><Label htmlFor="dateOfBirth">Date of Birth</Label><Input id="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={(e) => handleInputChange("dateOfBirth", e.target.value)} disabled={!isEditing} /></div>
                   <div>
@@ -458,14 +458,14 @@ const Profile = () => {
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea id="bio" value={formData.bio} onChange={(e) => handleInputChange("bio", e.target.value)} disabled={!isEditing} placeholder="Tell us about yourself..." maxLength={500} rows={4} />
-                  <p className="text-sm text-gray-500 text-right">{formData.bio?.length || 0}/500</p>
+                  <p className="text-sm text-muted-foreground text-right">{formData.bio?.length || 0}/500</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Academic Information Tab */}
-          <TabsContent value="academic" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
+          <TabsContent value="academic" className="mt-6 bg-card/80 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
               <CardHeader>
                 <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Academic Information</CardTitle>
@@ -495,20 +495,20 @@ const Profile = () => {
           </TabsContent>
 
           {/* Security Tab */}
-          <TabsContent value="security" className="mt-6 bg-white/30 rounded-2xl p-6 backdrop-blur-md shadow-md">
+          <TabsContent value="security" className="mt-6 bg-card/80 rounded-2xl p-6 backdrop-blur-md shadow-md">
             <Card>
               <CardHeader><CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">Change Password</CardTitle><CardDescription>Update your account password.</CardDescription></CardHeader>
               <CardContent className="space-y-4">
-                <div><Label htmlFor="currentPassword">Current Password</Label><Input id="currentPassword" type="password" value={passwordData.currentPassword} onChange={(e) => setPasswordData(p => ({...p, currentPassword: e.target.value}))} /></div>
-                <div><Label htmlFor="newPassword">New Password</Label><Input id="newPassword" type="password" value={passwordData.newPassword} onChange={(e) => setPasswordData(p => ({...p, newPassword: e.target.value}))} /></div>
-                <div><Label htmlFor="confirmPassword">Confirm New Password</Label><Input id="confirmPassword" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(p => ({...p, confirmPassword: e.target.value}))} /></div>
+                <div><Label htmlFor="currentPassword">Current Password</Label><Input id="currentPassword" type="password" value={passwordData.currentPassword} onChange={(e) => setPasswordData(p => ({ ...p, currentPassword: e.target.value }))} /></div>
+                <div><Label htmlFor="newPassword">New Password</Label><Input id="newPassword" type="password" value={passwordData.newPassword} onChange={(e) => setPasswordData(p => ({ ...p, newPassword: e.target.value }))} /></div>
+                <div><Label htmlFor="confirmPassword">Confirm New Password</Label><Input id="confirmPassword" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(p => ({ ...p, confirmPassword: e.target.value }))} /></div>
                 <Button onClick={handleChangePassword} className="w-full sm:w-auto">Change Password</Button>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-red-600">Delete Account</CardTitle><CardDescription>Permanently delete your account and all associated data.</CardDescription></CardHeader>
+              <CardHeader><CardTitle className="text-destructive-foreground">Delete Account</CardTitle><CardDescription>Permanently delete your account and all associated data.</CardDescription></CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg"><p className="text-red-800 text-sm"><strong>Warning:</strong> This action is irreversible. All your data will be permanently deleted.</p></div>
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg"><p className="text-destructive-foreground text-sm"><strong>Warning:</strong> This action is irreversible. All your data will be permanently deleted.</p></div>
                 {!showDeleteConfirm ? (
                   <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)} className="w-full sm:w-auto"><Trash2 className="h-4 w-4 mr-2" />Delete My Account</Button>
                 ) : (
@@ -516,7 +516,7 @@ const Profile = () => {
                     <div><Label htmlFor="deletePassword">To confirm, please enter your password</Label><Input id="deletePassword" type="password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="Enter your password" /></div>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Button variant="destructive" onClick={handleDeleteAccount} className="flex-1">Confirm Deletion</Button>
-                      <Button variant="outline" onClick={() => {setShowDeleteConfirm(false); setDeletePassword("");}} className="flex-1">Cancel</Button>
+                      <Button variant="outline" onClick={() => { setShowDeleteConfirm(false); setDeletePassword(""); }} className="flex-1">Cancel</Button>
                     </div>
                   </div>
                 )}
