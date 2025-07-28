@@ -6,6 +6,7 @@ import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import Courses from "./pages/Courses";
 import CourseView from "./pages/CourseView";
 import SemesterView from "./pages/SemesterView";
 import SubjectView from "./pages/SubjectView";
@@ -104,6 +105,14 @@ const App = () => {
             element={
               <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
+                <Courses />
               </ProtectedRoute>
             }
           />

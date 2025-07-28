@@ -28,7 +28,8 @@ const CourseView = () => {
 
 
   const [semesters, setSemesters] = useState<{ _id: string, number: number }[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Removed loading state as universal loading screen is used
+  // const [loading, setLoading] = useState(true);
   const [courseName, setCourseName] = useState<string>('');
 
   useEffect(() => {
@@ -50,8 +51,6 @@ const CourseView = () => {
         setSemesters(res.data);
       } catch (err) {
         console.error("Failed to fetch semesters", err);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -67,9 +66,13 @@ const CourseView = () => {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+         
           <Link to="/dashboard" className="flex items-center hover:text-uninote-blue transition-colors">
-            <Home className="h-4 w-4 mr-1" />
             Dashboard
+          </Link>
+          <ChevronRight className="h-4 w-4" />
+          <Link to="/courses" className="flex items-center hover:text-uninote-blue transition-colors">
+            Study Materials
           </Link>
           <ChevronRight className="h-4 w-4" />
           <span className="font-medium text-foreground">{getCourseName(courseName || '')}</span>

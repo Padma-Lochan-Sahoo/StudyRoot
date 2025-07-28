@@ -380,6 +380,10 @@ const SubjectView = () => {
             <span className="sm:hidden">Home</span>
           </Link>
           <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+          <Link to="/courses" className="flex items-center hover:text-primary whitespace-nowrap">
+            Study Materials
+          </Link>
+          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
           <Link to={`/dashboard/${course}`} className="hover:text-primary truncate max-w-[80px] sm:max-w-none">
             {courseName}
           </Link>
