@@ -7,6 +7,8 @@ import {
   changePassword,
   getUserStats,
   deleteAccount,
+  makeAdmin,
+  getAllUser
 } from "../controllers/profile.controller.js";
 import { protectRoute } from "../middleware/auth.moddleware.js";
 import upload from "../middleware/multer.js";
@@ -36,5 +38,9 @@ router.get("/stats", getUserStats);
 
 // Delete account
 router.delete("/", deleteAccount);
+
+router.get("/users", getAllUser);
+// Make user an admin
+router.put("/make-admin/:id", makeAdmin);
 
 export default router; 

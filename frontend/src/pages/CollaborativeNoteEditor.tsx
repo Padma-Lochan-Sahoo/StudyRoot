@@ -1,27 +1,26 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { getUserSessions } from "@/lib/collabNotesApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/useAuthStore";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import { useCallback } from "react";
-import Quill from "quill";
-import QuillCursors from "quill-cursors";
-// Register the cursors module
-Quill.register("modules/cursors", QuillCursors);
 import { useToast } from "@/hooks/use-toast";
+// TipTap + Yjs imports
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
+const COLLAB_SERVER_URL = "ws://localhost:1234"; // adjust if needed
 
 const CollaborativeNoteEditor = () => {
   const { sessionId } = useParams();
   const { authUser } = useAuthStore();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [content, setContent] = useState("");
-  const [isSyncing, setIsSyncing] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<{id: string, fullName: string, profilePic: string}[]>([]);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeout = useRef<any>(null);
@@ -36,6 +35,11 @@ const CollaborativeNoteEditor = () => {
   const [typingUsers, setTypingUsers] = useState<{ userId: string, fullName: string }[]>([]);
   const typingTimeouts = useRef<{ [userId: string]: NodeJS.Timeout }>({});
 
+  // Yjs + TipTap setup
+  const ydocRef = useRef<Y.Doc | null>(null);
+  const providerRef = useRef<WebsocketProvider | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
   // ReactQuill modules config
   const quillModules = {
     toolbar: [
@@ -48,8 +52,8 @@ const CollaborativeNoteEditor = () => {
     cursors: true,
   };
 
+  // Fetch session info
   useEffect(() => {
-    // For now, fetch all sessions and find the one with sessionId
     const fetchSession = async () => {
       setLoading(true);
       try {
@@ -65,6 +69,49 @@ const CollaborativeNoteEditor = () => {
     fetchSession();
   }, [sessionId]);
 
+  // Setup Yjs + WebSocket provider
+  useEffect(() => {
+    if (!sessionId) return;
+    ydocRef.current = new Y.Doc();
+    providerRef.current = new WebsocketProvider(
+      COLLAB_SERVER_URL,
+      sessionId,
+      ydocRef.current
+    );
+    providerRef.current.on('status', (event: any) => {
+      setIsSyncing(event.status === 'connected');
+    });
+    // Clean up on unmount
+    return () => {
+      providerRef.current?.destroy();
+      ydocRef.current?.destroy();
+    };
+  }, [sessionId]);
+
+  // Setup TipTap editor
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Collaboration.configure({
+        document: ydocRef.current!,
+      }),
+      CollaborationCursor.configure({
+        provider: providerRef.current!,
+        user: {
+          name: authUser?.fullName || "Anonymous",
+          color: "#38ef7d",
+        },
+      }),
+    ],
+    editorProps: {
+      attributes: {
+        class:
+          "bg-transparent text-black min-h-[320px] font-medium quill-dark h-full outline-none p-4",
+        spellCheck: "true",
+      },
+    },
+  });
+
   useEffect(() => {
     if (!sessionId || !authUser?._id) return;
     // Connect to Socket.IO
@@ -72,7 +119,7 @@ const CollaborativeNoteEditor = () => {
     socketRef.current = socket;
     socket.emit("join-session", { sessionId, userId: authUser._id });
     socket.on("note-content", (newContent: string) => {
-      setContent(newContent);
+      // setContent(newContent); // Yjs handles updates
       setIsSyncing(false);
     });
     socket.on("session-users", (users: any[]) => {
@@ -84,7 +131,7 @@ const CollaborativeNoteEditor = () => {
   }, [sessionId, authUser?._id]);
 
   const handleQuillChange = (value: string) => {
-    setContent(value);
+    // setContent(value); // Yjs handles updates
     setIsSyncing(true);
     if (socketRef.current) {
       socketRef.current.emit("note-update", { sessionId, content: value });
@@ -232,7 +279,8 @@ const CollaborativeNoteEditor = () => {
   }, [quillRef]);
 
   const handleSaveNote = () => {
-    if (socketRef.current && sessionId) {
+    if (socketRef.current && sessionId && editor) {
+      const content = editor.getHTML();
       socketRef.current.emit("note-update", { sessionId, content });
       if (toast) toast({ title: "Note saved!", description: "Your note has been saved." });
     }
@@ -273,34 +321,18 @@ const CollaborativeNoteEditor = () => {
                 Online: {onlineUsers.length}
               </span>
               <button className="bg-[#11998e]/90 hover:bg-[#38ef7d] text-white px-4 py-2 rounded-xl shadow transition-all font-semibold text-sm">Share</button>
-              <button className="bg-[#0575e6]/90 hover:bg-[#38ef7d] text-white px-4 py-2 rounded-xl shadow transition-all font-semibold text-sm" onClick={handleSaveNote}>Save</button>
+              {/* Save is not needed, Yjs auto-saves */}
             </div>
           </div>
           <div className="flex-1 flex flex-col px-10 py-6 overflow-y-auto">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-xs text-white font-medium tracking-wide">Real-time collaborative editor</span>
-              {/* Typing indicator for note editor */}
-              {typingUsers.length > 0 && (
-                <span className="text-xs text-[#11998e] animate-pulse ml-4">
-                  {typingUsers.map(u => (
-                    <span key={u.userId}>{u.fullName} is typing...</span>
-                  ))}
-                </span>
-              )}
+              {/* Typing indicator for note editor (optional with Yjs) */}
               {isSyncing && <span className="text-xs text-[#0575e6] animate-pulse font-semibold">Syncing...</span>}
             </div>
             <div className="rounded-2xl overflow-hidden shadow-lg border border-white/20 bg-white/10 backdrop-blur-md flex-1 min-h-[320px]">
-              <ReactQuill
-                theme="snow"
-                value={content}
-                onChange={handleQuillChange}
-                className="bg-transparent text-black min-h-[320px] font-medium quill-dark h-full"
-                placeholder="Start typing your collaborative note..."
-                ref={quillRef}
-                onChangeSelection={handleSelectionChange}
-                modules={quillModules}
-                onKeyDown={handleEditorTyping}
-              />
+              {/* TipTap EditorContent replaces ReactQuill */}
+              <EditorContent editor={editor} />
             </div>
             <div className="mt-6">
               <div className="flex flex-wrap gap-3 items-center">
@@ -339,18 +371,45 @@ const CollaborativeNoteEditor = () => {
             {chatMessages.map((msg, idx) => {
               const isMe = msg.userId === authUser?._id;
               return (
-                <div key={idx} className={`flex items-end gap-2 mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}> 
-                  {!isMe && (msg.profilePic ? (
-                    <img src={msg.profilePic} alt={msg.fullName} className="w-7 h-7 rounded-full object-cover border-2 border-[#38ef7d] shadow" />
-                  ) : (
-                    <span className="w-7 h-7 rounded-full bg-[#38ef7d] flex items-center justify-center text-xs font-bold text-[#0575e6] border-2 border-white">{msg.fullName[0]}</span>
-                  ))}
-                  <div className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                    <div className={`text-xs mb-0.5 ${isMe ? 'text-[#11998e]' : 'text-[#0575e6]'}`}>{isMe ? 'You' : msg.fullName}</div>
-                    <div className={`rounded-2xl px-4 py-2 shadow-sm break-words text-sm ${isMe ? 'bg-[#38ef7d] text-[#0575e6]' : 'bg-[#f1f5f9] text-gray-900'} `}>
+                <div
+                  key={idx}
+                  className={`flex items-end gap-2 mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+                >
+                  {!isMe &&
+                    (msg.profilePic ? (
+                      <img
+                        src={msg.profilePic}
+                        alt={msg.fullName}
+                        className="w-7 h-7 rounded-full object-cover border-2 border-[#38ef7d] shadow"
+                      />
+                    ) : (
+                      <span className="w-7 h-7 rounded-full bg-[#38ef7d] flex items-center justify-center text-xs font-bold text-[#0575e6] border-2 border-white">
+                        {msg.fullName[0]}
+                      </span>
+                    ))}
+                  <div
+                    className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                  >
+                    <div
+                      className={`text-xs mb-0.5 ${isMe ? 'text-[#11998e]' : 'text-[#0575e6]'}`}
+                    >
+                      {isMe ? 'You' : msg.fullName}
+                    </div>
+                    <div
+                      className={`rounded-2xl px-4 py-2 shadow-sm break-words text-sm ${
+                        isMe
+                          ? 'bg-[#38ef7d] text-[#0575e6]'
+                          : 'bg-[#f1f5f9] text-gray-900'
+                      }`}
+                    >
                       {msg.message}
                     </div>
-                    <span className="text-[10px] text-gray-400 mt-0.5">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="text-[10px] text-gray-400 mt-0.5">
+                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
                   </div>
                 </div>
               );
@@ -383,4 +442,4 @@ const CollaborativeNoteEditor = () => {
   );
 };
 
-export default CollaborativeNoteEditor; 
+export default CollaborativeNoteEditor;

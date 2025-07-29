@@ -70,7 +70,7 @@ const FeaturesSection = () => {
     <section
       id="features"
       ref={sectionRef}
-      className="py-24 bg-gradient-to-b from-white to-blue-50 relative overflow-hidden"
+      className="py-24 bg-background relative overflow-hidden"
     >
       <div
         className="absolute inset-0 opacity-20 transition-transform duration-200"
@@ -85,13 +85,13 @@ const FeaturesSection = () => {
         <div
           className={`text-center mb-16 transition-all duration-1000 ease-in-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-uninote-dark mb-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
             Platform
             <span className="bg-gradient-to-r from-uninote-blue to-uninote-purple bg-clip-text text-transparent ml-2">
               Features
             </span>
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Everything you need to ace your studies, all in one platform designed specifically for university students.
           </p>
         </div>
@@ -103,7 +103,7 @@ const FeaturesSection = () => {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="group relative overflow-hidden border border-white/20 backdrop-blur-sm bg-white/80 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+              className="group relative overflow-hidden border border-white/20 backdrop-blur-sm bg-card rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
             >
               <CardHeader className="text-center pb-4">
                 <div
@@ -111,12 +111,12 @@ const FeaturesSection = () => {
                 >
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold text-uninote-dark group-hover:text-uninote-blue transition-colors">
+                <CardTitle className="text-xl font-bold text-foreground group-hover:text-uninote-blue transition-colors">
                   {feature.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600 text-center leading-relaxed">
+                <CardDescription className="text-muted-foreground text-center leading-relaxed">
                   {feature.description}
                 </CardDescription>
               </CardContent>

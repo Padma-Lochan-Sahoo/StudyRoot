@@ -1,7 +1,5 @@
-
-
-import { v2 as cloudinary } from 'cloudinary';
-import streamifier from 'streamifier';
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 
 // Cloudinary config
 const connectCloudinary = async () => {
@@ -12,14 +10,16 @@ const connectCloudinary = async () => {
   });
 };
 
-// Stream upload function
-export const streamUpload = (buffer) => {
+// Stream upload function for unsigned preset
+export const streamUpload = (buffer, originalFilename) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: 'studyroot',
-        resource_type: 'raw',
-        access_mode: "public"
+        folder: "studyroot", // ✅ Target folder
+        upload_preset: "studyroot_public", // ✅ Unsigned preset
+        resource_type: "raw", // ✅ For PDF, DOCX, etc.
+        use_filename: false, // ✅ Use original file name
+        unique_filename: true, // ✅ Add random suffix to avoid collisions
       },
       (error, result) => {
         if (result) resolve(result);
@@ -36,13 +36,13 @@ export const uploadProfileImage = (buffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: 'profile-pictures',
-        resource_type: 'image',
+        folder: "profile-pictures",
+        resource_type: "image",
         access_mode: "public",
         transformation: [
           { width: 400, height: 400, crop: "fill", gravity: "face" },
-          { quality: "auto", fetch_format: "auto" }
-        ]
+          { quality: "auto", fetch_format: "auto" },
+        ],
       },
       (error, result) => {
         if (result) resolve(result);

@@ -1,4 +1,4 @@
-import multer from 'multer';
+import multer from "multer";
 
 // Use memory storage instead of disk
 const storage = multer.memoryStorage();
@@ -11,4 +11,3 @@ const upload = multer({
 });
 
 export default upload;
-

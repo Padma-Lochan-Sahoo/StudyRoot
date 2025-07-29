@@ -10,4 +10,4 @@ router.post('/join', protectRoute, joinCollabSession);
 router.get('/mine', protectRoute, getUserCollabSessions);
 router.delete('/:id', protectRoute, deleteCollabSession);
 
-export default router; 
+export default router;

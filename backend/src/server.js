@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 import connectDB from "./lib/db.js";
 import { app } from "./app.js";
@@ -52,42 +51,25 @@ const startServer = async () => {
             profilePic: user.profilePic || "",
           });
         }
-        // Emit current note content
-        const session = await CollabNoteSession.findById(sessionId);
-        if (session) {
-          socket.emit("note-content", session.noteContent || "");
-        }
-        // Broadcast updated user list
+        // Only emit session-users (no note-content)
         io.to(sessionId).emit("session-users", Array.from(sessionUsers[sessionId].values()));
-      });
-
-      // Handle note content changes
-      socket.on("note-update", async ({ sessionId, content }) => {
-        io.to(sessionId).emit("note-content", content);
-        await CollabNoteSession.findByIdAndUpdate(sessionId, { noteContent: content });
-      });
-
-      // Handle cursor/selection updates
-      socket.on("cursor-update", ({ sessionId, userId, selection }) => {
-        // Broadcast to others in the room
-        socket.to(sessionId).emit("remote-cursor", { userId, selection });
       });
 
       // Handle chat messages
       socket.on("chat-message", (msg) => {
-        console.log("[SOCKET] chat-message received:", msg);
-        if (msg && msg.sessionId) {
-          io.to(msg.sessionId).emit("chat-message", msg);
+        if (currentSessionId) {
+          io.to(currentSessionId).emit("chat-message", msg);
         }
       });
 
-      // Handle user typing indicator
-      socket.on("user-typing", ({ sessionId, userId, fullName }) => {
-        // Broadcast to others in the session
-        socket.to(sessionId).emit("user-typing", { userId, fullName });
+      // Handle typing indicators
+      socket.on("user-typing", (data) => {
+        if (currentSessionId) {
+          socket.to(currentSessionId).emit("user-typing", data);
+        }
       });
 
-      // On disconnect, remove user from session
+      // Handle disconnect
       socket.on("disconnect", () => {
         if (currentSessionId && currentUserId && sessionUsers[currentSessionId]) {
           sessionUsers[currentSessionId].delete(currentUserId);
@@ -97,7 +79,7 @@ const startServer = async () => {
     });
 
     httpServer.listen(port, "0.0.0.0", () => {
-      console.log(`Server running on http://localhost:${port}`);
+      console.log("Server running on http://localhost:${port}");
     });
   } catch (error) {
     console.error("Error starting the server:", error);

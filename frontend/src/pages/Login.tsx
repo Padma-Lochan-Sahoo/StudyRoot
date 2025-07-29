@@ -1,5 +1,5 @@
 import axios from "@/lib/axiosInstance";
-import { useState ,useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
@@ -34,10 +34,10 @@ const Login = () => {
   } = useAuthStore();
 
   useEffect(() => {
-  if (authUser) {
-    navigate("/dashboard");
-  }
-}, [authUser, navigate]);
+    if (authUser) {
+      navigate("/dashboard");
+    }
+  }, [authUser, navigate]);
 
 
   const [isLogin, setIsLogin] = useState(true);
@@ -103,7 +103,7 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (forgotPasswordStep) {
       const success = await verifyPasswordResetOtp(forgotPasswordEmail!, otp);
       if (success) {
@@ -210,19 +210,19 @@ const Login = () => {
       </div>
 
       {/* Right - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-uninote-light to-white">
-        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm border-0 shadow-2xl">
+      <div className="flex-1 flex items-center justify-center p-8 bg-background">
+        <Card className="w-full max-w-md bg-card/80 backdrop-blur-sm border-0 shadow-2xl">
           <CardHeader className="text-center">
             {(forgotPasswordStep || resetPasswordStep) && (
               <button
                 onClick={handleBackToLogin}
-                className="absolute left-4 top-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+                className="absolute left-4 top-4 flex items-center text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back
               </button>
             )}
-            
+
             <div className="lg:hidden flex items-center justify-center space-x-2 mb-4">
               <div className="bg-gradient-to-r from-uninote-blue to-uninote-purple p-2 rounded-xl">
                 <GraduationCap className="h-6 w-6 text-white" />
@@ -231,14 +231,14 @@ const Login = () => {
                 UniNote
               </span>
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-800">
+            <CardTitle className="text-2xl font-bold text-foreground">
               {currentStep === "forgot-password-otp" && "Verify OTP"}
               {currentStep === "reset-password" && "Reset Password"}
               {currentStep === "signup-otp" && "Verify OTP"}
               {currentStep === "login" && "Welcome Back"}
               {currentStep === "signup" && "Join UniNote"}
             </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-muted-foreground">
               {currentStep === "forgot-password-otp" && "Enter the OTP sent to your email"}
               {currentStep === "reset-password" && "Enter your new password"}
               {currentStep === "signup-otp" && "Enter the OTP sent to your email"}
@@ -254,7 +254,7 @@ const Login = () => {
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="fullName"
                       name="fullName"
@@ -262,7 +262,7 @@ const Login = () => {
                       placeholder="Enter your full name"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      className="pl-10 h-12 bg-white/50 border-gray-200"
+                      className="pl-10 h-12 bg-muted"
                       required
                     />
                   </div>
@@ -275,7 +275,7 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="email"
                         name="email"
@@ -284,7 +284,7 @@ const Login = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                        className="pl-10 h-12 bg-muted"
                       />
                     </div>
                   </div>
@@ -292,7 +292,7 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="password"
                         name="password"
@@ -301,7 +301,7 @@ const Login = () => {
                         value={formData.password}
                         onChange={handleInputChange}
                         required
-                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                        className="pl-10 h-12 bg-muted"
                       />
                     </div>
                   </div>
@@ -313,7 +313,7 @@ const Login = () => {
                 <div className="space-y-2">
                   <Label htmlFor="otp">OTP</Label>
                   <div className="relative">
-                    <Key className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="otp"
                       name="otp"
@@ -322,7 +322,7 @@ const Login = () => {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-white/50 border-gray-200"
+                      className="pl-10 h-12 bg-muted"
                     />
                   </div>
                 </div>
@@ -334,7 +334,7 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="newPassword"
                         name="newPassword"
@@ -343,7 +343,7 @@ const Login = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
-                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                        className="pl-10 h-12 bg-muted"
                       />
                     </div>
                   </div>
@@ -351,7 +351,7 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="confirmPassword"
                         name="confirmPassword"
@@ -360,7 +360,7 @@ const Login = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        className="pl-10 h-12 bg-white/50 border-gray-200"
+                        className="pl-10 h-12 bg-muted"
                       />
                     </div>
                   </div>
@@ -370,18 +370,17 @@ const Login = () => {
               <Button
                 type="submit"
                 disabled={
-                  isSigningUp || 
-                  isLoggingIn || 
-                  isVerifyingOtp || 
-                  isForgotPassword || 
-                  isVerifyingPasswordResetOtp || 
+                  isSigningUp ||
+                  isLoggingIn ||
+                  isVerifyingOtp ||
+                  isForgotPassword ||
+                  isVerifyingPasswordResetOtp ||
                   isResettingPassword
                 }
-                className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${
-                  isSigningUp || isLoggingIn || isVerifyingOtp || isForgotPassword || isVerifyingPasswordResetOtp || isResettingPassword
-                    ? "opacity-70 cursor-not-allowed"
-                    : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
-                }`}
+                className={`w-full h-12 bg-gradient-to-r from-uninote-blue to-uninote-purple text-white font-medium rounded-xl transition-all duration-300 ${isSigningUp || isLoggingIn || isVerifyingOtp || isForgotPassword || isVerifyingPasswordResetOtp || isResettingPassword
+                  ? "opacity-70 cursor-not-allowed"
+                  : "hover:from-uninote-purple hover:to-uninote-blue hover:scale-[1.02]"
+                  }`}
               >
                 {currentStep === "forgot-password-otp" && (isVerifyingPasswordResetOtp ? "Verifying OTP..." : "Verify OTP")}
                 {currentStep === "reset-password" && (isResettingPassword ? "Resetting Password..." : "Reset Password")}
@@ -407,7 +406,7 @@ const Login = () => {
             {/* Toggle between Login and Signup */}
             {!otpStep && !forgotPasswordStep && !resetPasswordStep && (
               <div className="text-center">
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
                   <button
                     onClick={() => setIsLogin(!isLogin)}

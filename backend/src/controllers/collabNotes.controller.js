@@ -87,4 +87,4 @@ export const deleteCollabSession = async (req, res) => {
     console.error("Delete Collab Session Error:", error);
     res.status(500).json({ success: false, message: "Failed to delete session" });
   }
-}; 
+};
