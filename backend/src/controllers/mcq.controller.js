@@ -1,8 +1,8 @@
-import mammoth from 'mammoth';
-import textract from 'textract';
-import fs from 'fs';
-import Quiz from '../models/Quiz.js';
-import { generateContentFromGemini } from '../lib/gemini.js';
+import mammoth from "mammoth";
+import textract from "textract";
+import fs from "fs";
+import Quiz from "../models/Quiz.js";
+import { generateContentFromGemini } from "../lib/gemini.js";
 
 export const generateMcqs = async (req, res) => {
   try {
@@ -19,15 +19,17 @@ export const generateMcqs = async (req, res) => {
       fileName = originalname;
 
       if (
-        mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        mimetype ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
         const result = await mammoth.extractRawText({ buffer });
         extractedText = result.value;
       } else if (
-        mimetype === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
-        mimetype === 'text/plain'
+        mimetype ===
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+        mimetype === "text/plain"
       ) {
-        const tempDir = './tmp';
+        const tempDir = "./tmp";
         if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
         const tempPath = `${tempDir}/${originalname}`;
@@ -41,18 +43,24 @@ export const generateMcqs = async (req, res) => {
           });
         });
       } else {
-        return res.status(400).json({ error: 'Unsupported file type' });
+        return res.status(400).json({ error: "Unsupported file type" });
       }
     }
 
     // ❌ No input at all
     if (!file && !userPrompt) {
-      return res.status(400).json({ error: "Please provide either a prompt or a file." });
+      return res
+        .status(400)
+        .json({ error: "Please provide either a prompt or a file." });
     }
 
     const hasText = extractedText.trim().length > 0;
-    const mcqCountMatch = userPrompt.toLowerCase().match(/generate\s+(\d+)\s+mcq/);
-    const mcqCount = mcqCountMatch ? Math.min(Math.max(parseInt(mcqCountMatch[1]), 1), 20) : 5;
+    const mcqCountMatch = userPrompt
+      .toLowerCase()
+      .match(/generate\s+(\d+)\s+mcq/);
+    const mcqCount = mcqCountMatch
+      ? Math.min(Math.max(parseInt(mcqCountMatch[1]), 1), 20)
+      : 10;
 
     // 🧠 Construct Final Prompt
     const finalPrompt = `
@@ -81,7 +89,7 @@ ${hasText ? extractedText : userPrompt}
     if (!match) {
       return res.status(500).json({
         error: "AI response did not contain a valid JSON array.",
-        raw: mcqsRaw // for debugging; remove in production
+        raw: mcqsRaw, // for debugging; remove in production
       });
     }
 
@@ -91,13 +99,13 @@ ${hasText ? extractedText : userPrompt}
     } catch (parseError) {
       return res.status(500).json({
         error: "Failed to parse AI response into JSON.",
-        raw: mcqsRaw // for debugging
+        raw: mcqsRaw, // for debugging
       });
     }
 
     // 💾 Save to DB
     const newQuiz = new Quiz({
-      originalFileName: fileName || 'PromptOnly',
+      originalFileName: fileName || "PromptOnly",
       userId,
       questions: mcqs,
     });
@@ -105,13 +113,14 @@ ${hasText ? extractedText : userPrompt}
     await newQuiz.save();
 
     return res.status(201).json({
-      message: 'MCQs generated successfully',
+      message: "MCQs generated successfully",
       quizId: newQuiz._id,
       mcqs,
     });
-
   } catch (err) {
-    console.error('Error in MCQ generation:', err);
-    return res.status(500).json({ error: 'Failed to generate MCQs. Please try again.' });
+    console.error("Error in MCQ generation:", err);
+    return res
+      .status(500)
+      .json({ error: "Failed to generate MCQs. Please try again." });
   }
 };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { Upload, Send, Paperclip, X, FileText, MessageSquare, Brain } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 interface MCQ {
   question: string;
@@ -26,14 +27,10 @@ const GenerateMCQ: React.FC = () => {
   const [feedback, setFeedback] = useState<{ [key: number]: string }>({});
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
+    if (e.target.files?.[0]) setFile(e.target.files[0]);
   };
 
-  const removeFile = () => {
-    setFile(null);
-  };
+  const removeFile = () => setFile(null);
 
   const addMessage = (message: ChatMessage) => {
     setMessages((prev) => [...prev, message]);
@@ -75,156 +72,190 @@ const GenerateMCQ: React.FC = () => {
   };
 
   const handleAnswerClick = (questionIndex: number, option: string, correctAnswer: string) => {
-    if (selectedAnswers[questionIndex]) return; // Don't allow changing answer after selection
+    if (selectedAnswers[questionIndex]) return;
 
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: option,
-    }));
-
+    setSelectedAnswers((prev) => ({ ...prev, [questionIndex]: option }));
+    
     const isCorrect = option === correctAnswer;
-    setFeedback((prev) => ({
-      ...prev,
-      [questionIndex]: isCorrect ? "correct" : "incorrect",
-    }));
+    setFeedback((prev) => ({ ...prev, [questionIndex]: isCorrect ? "correct" : "incorrect" }));
   };
 
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    return <FileText className="h-4 w-4 text-blue-600" />;
+  const getOptionStyle = (option: string, mcq: MCQ, questionIndex: number) => {
+    const selected = selectedAnswers[questionIndex];
+    const isSelected = selected === option;
+    
+    if (!selected) return "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300";
+    
+    if (option === mcq.answer) return "bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700 text-green-800 dark:text-green-400";
+    if (isSelected) return "bg-red-50 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-800 dark:text-red-400";
+    
+    return "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300";
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6">
-        <div className="max-w-4xl mx-auto flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <Brain className="h-5 w-5 text-white" />
+  const EmptyState = () => (
+    <div className="text-center py-12">
+      <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <Brain className="h-8 w-8 text-white" />
+      </div>
+      <h2 className="text-2xl font-semibold text-gray-900 mb-2">Ready to Generate MCQs?</h2>
+      <p className="text-gray-600 max-w-md mx-auto">
+        Upload a document or enter a topic to generate multiple choice questions with explanations
+      </p>
+    </div>
+  );
+
+const UserMessage = ({ content }: { content: string }) => (
+  <div className="bg-blue-600 dark:bg-blue-700 text-white rounded-2xl px-4 py-3">
+    <div className="flex items-center space-x-2">
+      <MessageSquare className="h-4 w-4 text-white" />
+      <span className="font-medium">You</span>
+    </div>
+    <p className="mt-1 text-white">{content}</p>
+  </div>
+);
+
+  const MCQOption = ({ option, mcq, questionIndex, optionIndex }: { 
+    option: string; 
+    mcq: MCQ; 
+    questionIndex: number; 
+    optionIndex: number; 
+  }) => {
+    const selected = selectedAnswers[questionIndex];
+    const isSelected = selected === option;
+    const optionStyle = getOptionStyle(option, mcq, questionIndex);
+
+    return (
+      <button
+        onClick={() => handleAnswerClick(questionIndex, option, mcq.answer)}
+        className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all duration-200 ${optionStyle} ${
+          !selected ? "hover:shadow-sm" : ""
+        } ${isSelected ? "font-medium" : ""}`}
+        disabled={!!selected}
+      >
+        <div className="flex items-center space-x-3">
+          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+            selected && option === mcq.answer ? "border-green-500 bg-green-500" :
+            selected && isSelected ? "border-red-500 bg-red-500" :
+            "border-gray-300 dark:border-gray-600"
+          }`}>
+            {selected && (option === mcq.answer || isSelected) && (
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            )}
           </div>
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">MCQ Quiz Generator</h1>
-            <p className="text-sm text-gray-500">Generate multiple choice questions from your files or prompts</p>
+          <span className="dark:text-gray-300">{option}</span>
+        </div>
+      </button>
+    );
+  };
+
+  const MCQQuestion = ({ mcq, index }: { mcq: MCQ; index: number }) => {
+    const selected = selectedAnswers[index];
+    const isCorrect = selected === mcq.answer;
+
+    return (
+      <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+        <div className="flex items-start space-x-3 mb-4">
+          <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{index + 1}</span>
           </div>
+          <p className="font-medium text-gray-900 dark:text-gray-100 leading-relaxed">{mcq.question}</p>
+        </div>
+        
+        <div className="ml-9 space-y-2">
+          {mcq.options.map((option, i) => (
+            <MCQOption 
+              key={i} 
+              option={option} 
+              mcq={mcq} 
+              questionIndex={index} 
+              optionIndex={i} 
+            />
+          ))}
+        </div>
+
+        {feedback[index] && (
+          <div className="ml-9 mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className={`w-2 h-2 rounded-full ${isCorrect ? "bg-green-500" : "bg-red-500"}`}></div>
+              <span className={`font-semibold text-sm ${isCorrect ? "text-green-700" : "text-red-700"} dark:${isCorrect ? "text-green-400" : "text-red-400"}`}>
+                {isCorrect ? "Correct!" : "Incorrect"}
+              </span>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+              <strong className="text-gray-900 dark:text-gray-100">Explanation:</strong> {mcq.explanation}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+const BotMessage = ({ mcqs }: { mcqs?: MCQ[] }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+      <div className="flex items-center space-x-2">
+        <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        <span className="font-medium text-gray-900 dark:text-gray-100">MCQ Generator</span>
+      </div>
+    </div>
+    
+    {mcqs ? (
+      <div className="p-4">
+        <div className="space-y-6">
+          {mcqs.map((mcq, index) => (
+            <MCQQuestion key={index} mcq={mcq} index={index} />
+          ))}
         </div>
       </div>
+    ) : (
+      <div className="p-4">
+        <div className="flex items-center space-x-3">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 dark:border-blue-400 border-t-transparent"></div>
+          <span className="text-gray-600 dark:text-gray-300">Generating MCQs...</span>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+  const FileAttachment = () => file && (
+    <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <FileText className="h-4 w-4 text-blue-600" />
+          <div>
+            <p className="text-sm font-medium text-blue-900">{file.name}</p>
+            <p className="text-xs text-blue-600">{(file.size / 1024).toFixed(1)} KB</p>
+          </div>
+        </div>
+        <button
+          onClick={removeFile}
+          className="p-1 hover:bg-blue-200 rounded-full transition-colors"
+        >
+          <X className="h-4 w-4 text-blue-600" />
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
 
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Brain className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Ready to Generate MCQs?</h2>
-              <p className="text-gray-600 max-w-md mx-auto">
-                Upload a document or enter a topic to generate multiple choice questions with explanations
-              </p>
-            </div>
+            <EmptyState />
           ) : (
             <div className="space-y-6">
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
-                >
+                <div key={msg.id} className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-3xl ${msg.type === "user" ? "ml-12" : "mr-12"}`}>
                     {msg.type === "user" ? (
-                      <div className="bg-blue-600 text-white rounded-2xl px-4 py-3">
-                        <div className="flex items-center space-x-2">
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="font-medium">You</span>
-                        </div>
-                        <p className="mt-1">{msg.content}</p>
-                      </div>
+                      <UserMessage content={msg.content} />
                     ) : (
-                      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                        <div className="px-4 py-3 border-b border-gray-100">
-                          <div className="flex items-center space-x-2">
-                            <Brain className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium text-gray-900">MCQ Generator</span>
-                          </div>
-                        </div>
-                        
-                        {msg.mcqs ? (
-                          <div className="p-4">
-                            <div className="space-y-6">
-                              {msg.mcqs.map((mcq, index) => {
-                                const selected = selectedAnswers[index];
-                                const isCorrect = selected === mcq.answer;
-                                return (
-                                  <div key={index} className="bg-gray-50 rounded-xl p-4">
-                                    <div className="flex items-start space-x-3 mb-4">
-                                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <span className="text-sm font-medium text-blue-600">{index + 1}</span>
-                                      </div>
-                                      <p className="font-medium text-gray-900 leading-relaxed">{mcq.question}</p>
-                                    </div>
-                                    
-                                    <div className="ml-9 space-y-2">
-                                      {mcq.options.map((option, i) => {
-                                        const isSelected = selected === option;
-                                        let optionStyle = "bg-white border-gray-200 hover:border-gray-300 text-gray-700";
-                                        
-                                        if (selected) {
-                                          if (option === mcq.answer) {
-                                            optionStyle = "bg-green-50 border-green-300 text-green-800";
-                                          } else if (isSelected) {
-                                            optionStyle = "bg-red-50 border-red-300 text-red-800";
-                                          }
-                                        }
-
-                                        return (
-                                          <button
-                                            key={i}
-                                            onClick={() => handleAnswerClick(index, option, mcq.answer)}
-                                            className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all duration-200 ${optionStyle} ${
-                                              !selected ? "hover:shadow-sm" : ""
-                                            } ${isSelected ? "font-medium" : ""}`}
-                                            disabled={!!selected}
-                                          >
-                                            <div className="flex items-center space-x-3">
-                                              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                                                selected && option === mcq.answer ? "border-green-500 bg-green-500" :
-                                                selected && isSelected ? "border-red-500 bg-red-500" :
-                                                "border-gray-300"
-                                              }`}>
-                                                {selected && (option === mcq.answer || isSelected) && (
-                                                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                                                )}
-                                              </div>
-                                              <span>{option}</span>
-                                            </div>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-
-                                    {feedback[index] && (
-                                      <div className="ml-9 mt-4 p-4 bg-white rounded-lg border border-gray-200">
-                                        <div className="flex items-center space-x-2 mb-2">
-                                          <div className={`w-2 h-2 rounded-full ${isCorrect ? "bg-green-500" : "bg-red-500"}`}></div>
-                                          <span className={`font-semibold text-sm ${isCorrect ? "text-green-700" : "text-red-700"}`}>
-                                            {isCorrect ? "Correct!" : "Incorrect"}
-                                          </span>
-                                        </div>
-                                        <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-                                          <strong className="text-gray-900">Explanation:</strong> {mcq.explanation}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="p-4">
-                            <p className="text-gray-700">{msg.content}</p>
-                          </div>
-                        )}
-                      </div>
+                      <BotMessage mcqs={msg.mcqs} />
                     )}
                   </div>
                 </div>
@@ -233,20 +264,7 @@ const GenerateMCQ: React.FC = () => {
               {loading && (
                 <div className="flex justify-start">
                   <div className="max-w-3xl mr-12">
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <div className="flex items-center space-x-2">
-                          <Brain className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium text-gray-900">MCQ Generator</span>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                          <span className="text-gray-600">Generating MCQs...</span>
-                        </div>
-                      </div>
-                    </div>
+                    <BotMessage />
                   </div>
                 </div>
               )}
@@ -256,34 +274,15 @@ const GenerateMCQ: React.FC = () => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t border-gray-200">
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
           
-          {/* File attachment display */}
-          {file && (
-            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  {getFileIcon(file.name)}
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">{file.name}</p>
-                    <p className="text-xs text-blue-600">{(file.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                </div>
-                <button
-                  onClick={removeFile}
-                  className="p-1 hover:bg-blue-200 rounded-full transition-colors"
-                >
-                  <X className="h-4 w-4 text-blue-600" />
-                </button>
-              </div>
-            </div>
-          )}
+          <FileAttachment />
 
           <div className="flex items-end space-x-3">
             {/* File Upload Button */}
@@ -297,10 +296,10 @@ const GenerateMCQ: React.FC = () => {
               />
               <label
                 htmlFor="file-upload"
-                className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex items-center justify-center"
+                className="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors flex items-center justify-center"
                 title="Upload file"
               >
-                <Paperclip className="h-5 w-5 text-gray-500" />
+                <Paperclip className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </label>
             </div>
 
@@ -316,7 +315,7 @@ const GenerateMCQ: React.FC = () => {
                     handleGenerateQuiz();
                   }
                 }}
-                className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
+                className="w-full px-4 py-3 pr-12 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 rows={1}
                 style={{ minHeight: '48px', maxHeight: '120px' }}
               />
@@ -333,7 +332,7 @@ const GenerateMCQ: React.FC = () => {
             </button>
           </div>
 
-          <div className="mt-2 text-xs text-gray-500 text-center">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
             Upload a document or enter a prompt to generate MCQs • Press Enter to send
           </div>
         </div>
