@@ -29,7 +29,7 @@ const Dashboard = () => {
       title: "Collaborative Editor",
       description: "Work together in real-time",
       icon: Code,
-      onClick: () => navigate("/collaborative-note-sessions"),
+      onClick: () => navigate("/collaborative-editor"),
     },
     {
       title: "Quiz Generator",

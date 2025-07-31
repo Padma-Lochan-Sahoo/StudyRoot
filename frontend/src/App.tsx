@@ -14,7 +14,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import GenerateMCQ from "./pages/GenerateMCQ";
-import CollaborativeNoteEditor from "./pages/CollaborativeNoteEditor";
+
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
@@ -157,14 +157,7 @@ const App = () => {
             }
           />
 
-          <Route
-            path="/collaborative-editor/:sessionId"
-            element={
-              <ProtectedRoute allowedRoles={DASHBOARD_ROLES}>
-                <CollaborativeNoteEditor />
-              </ProtectedRoute>
-            }
-          />
+       
          
           <Route path="*" element={<NotFound />} />
           <Route

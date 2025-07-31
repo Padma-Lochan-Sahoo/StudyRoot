@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "node src/collab-server.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
+    "lib0": "^0.2.114",
     "mammoth": "^1.9.1",
     "mongoose": "^8.16.3",
     "multer": "^2.0.2",
@@ -32,6 +34,11 @@
     "passport-google-oauth20": "^2.0.0",
     "socket.io": "^4.8.1",
     "streamifier": "^0.1.1",
-    "textract": "^2.5.0"
+    "textract": "^2.5.0",
+    "ws": "^8.18.3",
+    "y-mongodb": "^0.1.11",
+    "y-protocols": "^1.0.6",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27"
   }
 }

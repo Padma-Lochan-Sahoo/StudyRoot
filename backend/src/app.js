@@ -32,10 +32,7 @@ import mcqRoutes from "./routes/mcqRoutes.js"
 import dashboardRoute from "./routes/dashboardRoutes.js";
 
 import commentRoute from "./routes/commentRoutes.js";
-
 import ratingRoute from "./routes/ratingRoutes.js";
-import collabNoteRoutes from "./routes/collabNoteRoutes.js";
-
 
 // routes declaration
 app.use("/api/auth", authRoute);
@@ -51,8 +48,5 @@ app.use("/api/note-ratings", noteRatingRoute);
 app.use("/api/profile", profileRoute);
 app.use('/api/mcq', mcqRoutes);
 app.use("/api/dashboard", dashboardRoute);
-
-app.use("/api/collab", collabNoteRoutes);
-
 
 export { app };

@@ -1,17 +1,9 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import connectDB from "./lib/db.js";
 import { app } from "./app.js";
 import connectCloudinary from "./lib/cloudinary.js";
-import { createServer } from "http";
-import { Server as SocketIOServer } from "socket.io";
-import CollabNoteSession from "./models/CollabNoteSession.js";
-import User from "./models/user.model.js";
-
-
-
-dotenv.config();
-
-
 
 const startServer = async () => {
   try {
@@ -21,65 +13,8 @@ const startServer = async () => {
     console.log("✅ Cloudinary Connected");
 
     const port = process.env.PORT || 3000; // Fallback to 3000 if PORT is not set
-    const httpServer = createServer(app);
-    const io = new SocketIOServer(httpServer, {
-      cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
-        credentials: true,
-      },
-    });
-
-    // In-memory map: sessionId -> Map of userId -> userInfo
-    const sessionUsers = {};
-
-    io.on("connection", (socket) => {
-      let currentSessionId = null;
-      let currentUserId = null;
-
-      // Join a session room
-      socket.on("join-session", async ({ sessionId, userId }) => {
-        socket.join(sessionId);
-        currentSessionId = sessionId;
-        currentUserId = userId;
-        // Fetch user info
-        const user = await User.findById(userId).select("_id fullName profilePic");
-        if (!sessionUsers[sessionId]) sessionUsers[sessionId] = new Map();
-        if (user) {
-          sessionUsers[sessionId].set(userId, {
-            id: user._id.toString(),
-            fullName: user.fullName,
-            profilePic: user.profilePic || "",
-          });
-        }
-        // Only emit session-users (no note-content)
-        io.to(sessionId).emit("session-users", Array.from(sessionUsers[sessionId].values()));
-      });
-
-      // Handle chat messages
-      socket.on("chat-message", (msg) => {
-        if (currentSessionId) {
-          io.to(currentSessionId).emit("chat-message", msg);
-        }
-      });
-
-      // Handle typing indicators
-      socket.on("user-typing", (data) => {
-        if (currentSessionId) {
-          socket.to(currentSessionId).emit("user-typing", data);
-        }
-      });
-
-      // Handle disconnect
-      socket.on("disconnect", () => {
-        if (currentSessionId && currentUserId && sessionUsers[currentSessionId]) {
-          sessionUsers[currentSessionId].delete(currentUserId);
-          io.to(currentSessionId).emit("session-users", Array.from(sessionUsers[currentSessionId].values()));
-        }
-      });
-    });
-
-    httpServer.listen(port, "0.0.0.0", () => {
-      console.log("Server running on http://localhost:${port}");
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${port}`);
     });
   } catch (error) {
     console.error("Error starting the server:", error);
